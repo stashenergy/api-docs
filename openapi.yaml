@@ -1,0 +1,1056 @@
+openapi: "3.0.2"
+info:
+  title: Stash Energy Utility API
+  version: 1.5.1
+  contact:
+    name: API Support
+    url: https://stash.energy/contact
+    email: info@stash.energy
+  description: |
+    # Introduction
+
+    Welcome to the Stash Energy Utility API!
+
+    If you're interested in integrating your utility management software with
+    Stash Energy, please contact us!
+
+    We currently provide our documentation in the form of an [OpenAPI 3.0.2](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md)
+    document.
+
+    # Authentication
+
+    Tokens should be made using the OAuth Bearer Token specification,
+    using the Authorization header in the request.
+
+    Here is an example:
+
+    ```
+    GET /utilities HTTP/1.1
+    Host: api.stash.energy
+    Authorization: Bearer {token}
+    ```
+
+    ## Authentication flow
+
+    1. Get an `id` and `key` from your Stash Energy representative (one time only)
+    2. Send a POST command to [this URL](https://stashapi.b2clogin.com/stashapi.onmicrosoft.com/oauth2/v2.0/token?p=b2c_1_auth&grant_type=password&scope=openid%20032d91df-6ddf-43d3-bcc9-8015d1f5a539&client_id=032d91df-6ddf-43d3-bcc9-8015d1f5a539&response_type=token) with the following parameters in the `x-www-form-urlencoded` format:
+        * username = `<id>`
+        * password = `<key>`
+    3. Retrieve the access token from the `access_token` property of the JSON response
+    4. Use this token to authenticate your API requests. (Include it in the Authorization header)
+
+    **NOTE: The access token will be valid for 4 hours**
+
+    # API Versions
+
+    You can specify the version of the API used in the URL. If no version is specified, version 1 will be used:
+
+    `https://api.stash.energy/utilities` for version 1  
+    `https://api.stash.energy/v2/utilities` for version 2 (does not exist currently)
+
+    # CHANGELOG
+
+    All notable changes to this API will be documented in this section
+
+    ## 1.5.1 - 2020-03-04
+    ### Added
+    - `firmwareVersion` property in Unit response
+
+    ### Removed
+    - `unit` expand option from GET Units endpoint (units are now always expanded)
+
+    ## 1.5.0 - 2019-10-17
+    ### Added
+    - `connectionReliability` property in Unit response
+    - `start` and `end` properties in Realtime Storage Schedule response
+
+    ### Changed
+    - Auth URL
+    - API version is now specified in the URL as opposed to an Accept header
+    - URLs use dashes instead of underscores
+    - POST endpoints are now PUTs, as they are idempotent updates (sending the same request multiple times will lead to the same result)
+    - Rename `/default_schedule` endpoint to `/weekly-schedule` and changed terminology throughout docs to match
+    - Rename `/schedule` endpoint to `/realtime-schedule` and change terminology throughout docs to match
+    - Realtime schedules now expect a time interval specified with `start` and `end` properties, replacing the single `time` property
+    - Change values of `scheduleMode` enum of state to `weekly` and `realtime` instead of `default`, `programmed`, and `override`
+    - Expect `schedule` property instead of `defaultSchedule` in Weekly Schedule request body.
+    - Rename `utcOffsetInSeconds` property to `utcOffset` in Weekly Schedule response
+    - Rename `utc_offset` query param to `utcOffset` for Weekly Schedule endpoints
+    - Rename `model` property to `type` in Unit response
+    - Improve/fix examples
+
+    ### Removed
+    - Different update modes for Realtime Schedule updates
+    - `/storageMode` endpoint. The same functionality can be acheived with a PUT to the `/realtime-schedule` endpoint
+    - `time` property from Realtime Storage Schedule response
+    - `id` property from User response
+    - `status` property from State response
+    - `chargePercent` property from State response
+    - `uptime` porperty from Unit response
+    - Pagination from `utilities` endpoint
+    - Unused error responses
+
+servers:
+  - url: https://api.stash.energy/
+    description: Production Server
+paths:
+  /user:
+    get:
+      tags:
+        - User
+      operationId: getUser
+      summary: Get current authenticated user
+      description: Returns a User resource
+      responses:
+        "200":
+          description: SUCCESS
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /utilities:
+    get:
+      tags:
+        - Utilities
+      operationId: getUtilities
+      summary: Get utilities
+      description: |
+        Returns a collection of Utility resources that the user has access to.
+      responses:
+        "200":
+          description: SUCCESS
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Utilities"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /utilities/{utilityId}:
+    parameters:
+      - $ref: "#/components/parameters/Utility"
+    get:
+      tags:
+        - Utilities
+      operationId: getUtilityById
+      summary: Get a utility
+      description: Returns the Utility resource corresponding to the provided id.
+      responses:
+        "200":
+          description: SUCCESS
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Utility"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /utilities/{utilityId}/units:
+    parameters:
+      - $ref: "#/components/parameters/Utility"
+      - $ref: "#/components/parameters/Limit"
+      - $ref: "#/components/parameters/Page"
+      - $ref: "#/components/parameters/Expand"
+    get:
+      tags:
+        - Units
+      operationId: getUnitsForUtility
+      summary: Get a utility's storage units
+      description: |
+        Returns a collection of Unit resources controlled by the given Utility.  
+        Valid options for the `expand` query parameter include:  
+          * `unit.state`: The unit's current state will be included in the response
+      responses:
+        "200":
+          description: SUCCESS
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Units"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /utilities/{utilityId}/units/{unitId}:
+    parameters:
+      - $ref: "#/components/parameters/Utility"
+      - $ref: "#/components/parameters/Unit"
+    get:
+      tags:
+        - Units
+      operationId: getUnitByIdForUtility
+      summary: Get a storage unit
+      description: >
+        Returns a Unit resource corresponding to the given id, provided it is controlled
+        by the given utility.
+      responses:
+        "200":
+          description: SUCCESS
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Unit"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /utilities/{utilityId}/units/{unitId}/past-states:
+    parameters:
+      - $ref: "#/components/parameters/Utility"
+      - $ref: "#/components/parameters/Unit"
+      - $ref: "#/components/parameters/StartTimestamp"
+      - $ref: "#/components/parameters/EndTimestamp"
+      - $ref: "#/components/parameters/Limit"
+      - $ref: "#/components/parameters/Page"
+    get:
+      tags:
+        - Units
+      operationId: getPastStatesForUtilityUnit
+      summary: Get a unit's past states
+      description: |
+        Returns a collection of State resources.  
+        A State is a "snapshot" of a unit's physical state and/or the state of its environment
+        at a particular moment in time (given by the `timestamp` property).  
+        Use this endpoint to see the history of a unit's changing properties.
+      responses:
+        "200":
+          description: SUCCESS
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PastStates"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /utilities/{utilityId}/units/{unitId}/past-states/{stateId}:
+    parameters:
+      - $ref: "#/components/parameters/Utility"
+      - $ref: "#/components/parameters/Unit"
+      - $ref: "#/components/parameters/State"
+    get:
+      tags:
+        - Units
+      operationId: getPastStateByIdForUtilityUnit
+      summary: Get a past state
+      description: Returns a State corresponding to the given id.
+      responses:
+        "200":
+          description: SUCCESS
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/State"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /utilities/{utilityId}/units/{unitId}/realtime-schedule:
+    parameters:
+      - $ref: "#/components/parameters/Utility"
+      - $ref: "#/components/parameters/Unit"
+    get:
+      tags:
+        - Unit Storage
+      operationId: getRealtimeScheduleForUtilityUnit
+      summary: Get a realtime storage schedule
+      description: |
+        The realtime schedule tells a unit what storage mode to switch to at specific datetimes.  
+        This is the schedule used when the `scheduleMode` of a unit is `"realtime"`.
+      responses:
+        "200":
+          description: SUCCESS
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RealtimeStorageSchedule"
+              examples:
+                one:
+                  $ref: "#/components/examples/RealtimeStorageScheduleResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+    put:
+      tags:
+        - Unit Storage
+      operationId: setRealtimeScheduleForUtilityUnit
+      summary: Set a unit's realtime storage schedule
+      description: |
+        Provide a realtime storage schedule for a unit.  
+        A successful request means the schedule has been delivered to the unit.  
+        A 503 error is returned if the update cannot be delivered to the unit.
+      requestBody:
+        $ref: "#/components/requestBodies/RealtimeStorageScheduleUpdate"
+      responses:
+        "200":
+          description: SUCCESS
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RealtimeStorageSchedule"
+              examples:
+                one:
+                  $ref: "#/components/examples/RealtimeStorageScheduleResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/InternalError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /utilities/{utilityId}/units/{unitId}/weekly-schedule:
+    parameters:
+      - $ref: "#/components/parameters/Utility"
+      - $ref: "#/components/parameters/Unit"
+      - $ref: "#/components/parameters/UtcOffset"
+    get:
+      tags:
+        - Unit Storage
+      operationId: getWeeklyScheduleForUtilityUnit
+      summary: Get a weekly storage schedule
+      description: |
+        This schedule is executed when there are no future storage mode changes in the realtime schedule.  
+        This is the schedule used when the `scheduleMode` of a unit is `"weekly"`.
+      responses:
+        "200":
+          description: SUCCESS
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WeeklySchedule"
+              examples:
+                one:
+                  $ref: "#/components/examples/WeeklyScheduleResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+    put:
+      tags:
+        - Unit Storage
+      operationId: setWeeklyScheduleForUtilityUnit
+      summary: Set a unit's weekly storage schedule
+      description: |
+        Provide a weekly storage schedule for a unit.  
+        A successful request means the schedule has been delivered to the unit.  
+        A 503 error is returned if the update cannot be delivered to the unit.
+      requestBody:
+        $ref: "#/components/requestBodies/WeeklyStorageScheduleUpdate"
+      responses:
+        "200":
+          description: SUCCESS
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WeeklySchedule"
+              examples:
+                one:
+                  $ref: "#/components/examples/WeeklyScheduleResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/InternalError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+components:
+  responses:
+    BadRequest: # 400
+      description: BAD_REQUEST
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/BadRequest"
+          examples:
+            one:
+              $ref: "#/components/examples/BadRequest"
+    Unauthorized: # 401
+      description: UNAUTHORIZED
+      content:
+        text/plain:
+          schema:
+            $ref: "#/components/schemas/Unauthorized"
+    Forbidden: # 403
+      description: FORBIDDEN
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Forbidden"
+          examples:
+            one:
+              $ref: "#/components/examples/Forbidden"
+    NotFound: # 404
+      description: NOT_FOUND
+      content:
+        application/json: # What we send back
+          schema:
+            $ref: "#/components/schemas/NotFound"
+          examples:
+            one:
+              $ref: "#/components/examples/NotFound"
+    UnprocessableEntity: # 422
+      description: UNPROCESSABLE_ENTITY
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/UnprocessableEntity"
+          examples:
+            one:
+              $ref: "#/components/examples/UnprocessableEntity"
+    InternalError: # 500
+      description: INTERNAL_ERROR
+      content:
+        text/plain:
+          schema:
+            $ref: "#/components/schemas/InternalError"
+    ServiceUnavailable: # 503
+      description: SERVICE_UNAVAILABLE
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ServiceUnavailable"
+          examples:
+            one:
+              $ref: "#/components/examples/DeviceUpdateFailed"
+  schemas:
+    User:
+      type: object
+      properties:
+        href:
+          type: string
+          format: uri
+          description: Link to self
+        name:
+          type: string
+          description: User's name
+          readOnly: true
+      example:
+        href: https://api.stash.energy/user
+        name: SpryPoint
+    Utilities:
+      type: object
+      readOnly: true
+      properties:
+        href:
+          type: string
+          format: uri
+          description: Link to self
+        pagination:
+          $ref: "#/components/schemas/Pagination"
+        utilities:
+          type: array
+          items:
+            $ref: "#/components/schemas/Utility"
+          description: List of utilities
+    Utility:
+      type: object
+      properties:
+        href:
+          type: string
+          format: uri
+          description: Link to self
+          readOnly: true
+        id:
+          type: string
+          readOnly: true
+          description: Utility ID
+        name:
+          type: string
+          description: Utility's name
+      example:
+        href: https://api.stash.energy/utilities/12abcde3-fgh4-5ij6-k7l8-9012345mn678
+        id: 12abcde3-fgh4-5ij6-k7l8-9012345mn678
+        name: Stash Electric
+    Units:
+      type: object
+      readOnly: true
+      properties:
+        href:
+          type: string
+          format: uri
+          description: Link to self
+        pagination:
+          $ref: "#/components/schemas/Pagination"
+        units:
+          type: array
+          items:
+            $ref: "#/components/schemas/Unit"
+          description: List of units
+    Unit:
+      type: object
+      properties:
+        href:
+          type: string
+          format: uri
+          description: URL to self
+          readOnly: true
+        id:
+          type: string
+          readOnly: true
+          description: Unit's ID
+        type:
+          type: string
+          readOnly: true
+          description: The type of storage unit, e.g. M1
+        connectionReliability:
+          type: number
+          format: double
+          readOnly: true
+          description: How likely the device is to be connected to the Internet (0.0 - 100.0)
+        firmwareVersion:
+          type: string
+          readOnly: true
+          description: The unit's Stash firmware version 
+        maxCapacity:
+          type: number
+          format: double
+          readOnly: true
+          description: Max charge capacity of the storage unit, in kWh
+        maxChargeRate:
+          type: number
+          format: double
+          readOnly: true
+          description: Max charge rate of the storage unit, in kW
+        state:
+          $ref: "#/components/schemas/State"
+      example:
+        href: https://api.stash.energy/utilities/12abcde3-fgh4-5ij6-k7l8-9012345mn678/units/12abcde3-fgh4-5ij6-k7l8-9012345mn678
+        id: 12abcde3-fgh4-5ij6-k7l8-9012345mn678
+        type: M1
+        connectionReliability: 89.7
+        firmwareVersion: "1.1.2019102513"
+        maxCapacity: 3.5
+        maxChargeRate: 1.5
+        state:
+          href: https://api.stash.energy/utilities/12abcde3-fgh4-5ij6-k7l8-9012345mn678/units/12abcde3-fgh4-5ij6-k7l8-9012345mn678/past-states/12abcde3-fgh4-5ij6-k7l8-9012345mn678
+          id: 12abcde3-fgh4-5ij6-k7l8-9012345mn678
+          timestamp: 1577836800
+          scheduleMode: realtime
+          storageMode: charge
+          chargeRate: 1.0
+          dischargeRate: 0.5
+          charge: 3.0
+          outdoorTemp: 16.5
+    PastStates:
+      type: object
+      readOnly: true
+      properties:
+        href:
+          type: string
+          format: uri
+          description: Link to self
+        start:
+          type: integer
+          format: int64
+          description: Start timestamp in epoch seconds that was provided in the request query parameters
+        end:
+          type: integer
+          format: int64
+          description: End timestamp in epoch seconds that was provided in the request query parameters. If it was not provided, it is the timestamp of when the request was received
+        pagination:
+          $ref: "#/components/schemas/Pagination"
+        pastStates:
+          type: array
+          items:
+            $ref: "#/components/schemas/State"
+          description: List of past states
+    State:
+      type: object
+      description: An object representing the unit's dynamic info at a specific time in history
+      readOnly: true
+      properties:
+        href:
+          type: string
+          format: uri
+          description: Link to self
+        id:
+          type: string
+          description: State ID
+        timestamp:
+          type: integer
+          format: int64
+          description: Timestamp in epoch seconds of when this state was recorded
+        scheduleMode:
+          $ref: "#/components/schemas/ScheduleModeEnum"
+        storageMode:
+          $ref: "#/components/schemas/StorageModeEnum"
+        chargeRate:
+          type: number
+          format: double
+          description: Current charging rate, in kW
+          readOnly: true
+        dischargeRate:
+          type: number
+          format: double
+          description: Current discharge rate, in kW
+          readOnly: true
+        charge:
+          type: number
+          format: double
+          description: Current charge level, in kWh
+          readOnly: true
+        outdoorTemp:
+          type: number
+          format: double
+          description: The outdoor ambient temperature
+          readOnly: true
+      example:
+        href: https://api.stash.energy/utilities/12abcde3-fgh4-5ij6-k7l8-9012345mn678/units/12abcde3-fgh4-5ij6-k7l8-9012345mn678/past-states/12abcde3-fgh4-5ij6-k7l8-9012345mn678
+        id: 12abcde3-fgh4-5ij6-k7l8-9012345mn678
+        timestamp: 1577836800
+        scheduleMode: realtime
+        storageMode: charge
+        chargeRate: 1.0
+        dischargeRate: 0.5
+        charge: 3.0
+        outdoorTemp: 16.5
+    StorageModeEnum:
+      type: string
+      description: |
+        Describes the storage mode of the unit. The allowed values are:
+        * "charge": The unit is charging
+        * "discharge": The unit is discharging
+        * "maintain": The unit is maintaining its charge
+      enum:
+        - charge
+        - discharge
+        - maintain
+    RealtimeStorageSchedule:
+      type: object
+      description: A unit's schedule, consisting of a list of StorageEvents. Times are in epoch seconds
+      properties:
+        href:
+          type: string
+          format: uri
+          description: Link to self
+          readOnly: true
+        schedule:
+          type: array
+          description: A list of times to change the unit's storage mode
+          items:
+            $ref: "#/components/schemas/StorageEvent"
+    WeeklySchedule:
+      type: object
+      description: |
+        A unit's weekly schedule, consisting of a list of weekdays and 24h times when to change the storage mode.  
+        The unit will use this schedule if no other schedule is provided. This schedule is only active when a Units' scheduleMode state is set to "weekly"
+      properties:
+        href:
+          type: string
+          format: uri
+          description: Link to self
+          readOnly: true
+        utcOffset:
+          type: integer
+          format: int32
+          description: "The UTC offset in seconds as given in the query parameter"
+          readOnly: true
+        schedule:
+          type: array
+          items:
+            $ref: "#/components/schemas/WeeklyStorageModeChange"
+          description: Weekly schedule
+      required:
+        - utcOffset
+        - schedule
+    ScheduleModeEnum:
+      type: string
+      description: |
+        Describes the schedule mode of the unit. The allowed values are:
+        * "weekly": The unit is using its weekly schedule to determine its storage mode
+        * "realtime": The unit is using the provided real-time schedule to determine its storage mode
+      enum:
+        - weekly
+        - realtime
+    StorageEvent:
+      type: object
+      properties:
+        start:
+          type: integer
+          format: int64
+          description: When the event should begin (epoch seconds timestamp)
+        end:
+          type: integer
+          format: int64
+          description: When the event should end (epoch seconds timestamp)
+        storageMode:
+          $ref: "#/components/schemas/StorageModeEnum"
+      required:
+        - start
+        - end
+        - storageMode
+      example:
+        time: 1577836800
+        storageMode: "charge"
+    WeeklyStorageModeChange:
+      type: object
+      properties:
+        storageMode:
+          $ref: "#/components/schemas/StorageModeEnum"
+        time:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 86339
+          description: "When to set storage mode (In seconds after midnight)"
+        days:
+          type: array
+          items:
+            type: boolean
+          description: |
+            An array of size 7 representing the weekdays on which this change should take place.  
+            __NOTE: `days` array starts at Sunday, i.e. `days[0]` = Sunday__
+      required:
+        - storageMode
+        - time
+        - days
+      example:
+        storageMode: "discharge"
+        time: 900
+        days: [false, true, true, true, true, true, false]
+    Pagination:
+      description: Object with information about the result set (total results, where to get the next page of results, etc)
+      type: object
+      properties:
+        total:
+          type: integer
+          format: int32
+          description: Total number of results in the response
+        limit:
+          type: integer
+          format: int32
+          description: The limit of results per request
+        next:
+          type: string
+          format: uri
+          description: URL to the next page of results. This property is not present if not applicable
+      required:
+        - total
+        - limit
+      example:
+        total: 50
+        limit: 50
+        next: https://api.stash.energy/.../limit=50&page=RID:nk0tAPmRXDZ9AQAAAAAAAA==|RT:1|TRC:366|RTD:dLPB1xKK7cA=|FPC:AQ8AAAAAAAAAfQEAAAAAAAA=
+    BadRequest:
+      $ref: "#/components/schemas/Error"
+    Unauthorized:
+      type: string
+      example: You do not have permission to view this directory or page.
+    Forbidden:
+      $ref: "#/components/schemas/Error"
+    NotFound:
+      $ref: "#/components/schemas/Error"
+    InternalError:
+      type: string
+      example: The page cannot be displayed because an internal server error has occurred.
+    ServiceUnavailable:
+      $ref: "#/components/schemas/Error"
+    UnprocessableEntity:
+      $ref: "#/components/schemas/Error"
+    Error:
+      type: object
+      description: Sent by API
+      properties:
+        status:
+          type: integer
+          format: int32
+          description: HTTP status code
+        code:
+          type: integer
+          format: int32
+          description: A more descriptive internal code
+        message:
+          type: string
+          description: A message describing the error
+        errors:
+          type: array
+          items:
+            $ref: "#/components/schemas/FieldError"
+          description: If applicable, the parts of the request that are producing the error
+      required:
+        - status
+        - code
+        - message
+    FieldError:
+      type: object
+      description: An error to do with a specific property/field
+      properties:
+        property:
+          type: string
+          description: The property/field of the request url/body that is producing the error
+        message:
+          type: string
+          description: A message describing the issue with the property
+  parameters:
+    Expand:
+      name: expand
+      in: query
+      description: |
+        A comma separated list of propert(y|ies) you wish to expand in the response (that otherwise would not be provided).
+        Currently only valid for the `/units` endpoint.
+      schema:
+        type: array
+        items:
+          type: string
+    Utility:
+      name: utilityId
+      in: path
+      description: A utility ID
+      required: true
+      schema:
+        type: string
+      examples:
+        one:
+          value: "12abcde3-fgh4-5ij6-k7l8-9012345mn678"
+    Unit:
+      name: unitId
+      in: path
+      description: A unit ID
+      required: true
+      schema:
+        type: string
+      examples:
+        one:
+          value: 12abcde3-fgh4-5ij6-k7l8-9012345mn678
+    State:
+      name: stateId
+      in: path
+      description: A past state ID
+      required: true
+      schema:
+        type: string
+      examples:
+        one:
+          value: "12abcde3-fgh4-5ij6-k7l8-9012345mn678"
+    Limit:
+      name: limit
+      in: query
+      description: The number of items to return
+      schema:
+        type: integer
+        format: int32
+        default: 50
+    Offset:
+      name: offset
+      in: query
+      description: Integer specifying the numbered result at which to start
+      schema:
+        type: integer
+        format: int64
+        default: 0
+    Page:
+      name: page
+      in: query
+      description: |
+        An API-generated token that will be provided to you if your previous request was paged and there are one or more pages remaining.
+      schema:
+        type: string
+      examples:
+        one:
+          value: "%5b%7b%22compositeToken%22%3a%7b%22token%22%3a%22%2bRID%3ank0tAPmRXDYeAAAAAAAAAA%3d%3d%23RT%3a1%23TRC%3a14%23RTD%3adLPB1wtG9MA%3d%23ISV%3a1%23FPC%3aAgEAAACkABEAAMCxQQAQIQQGADYA%2fv8PgAP%2f8wCAf%2bD%2fEUB%2fMCEAAHwSAAB6eABEAAjAA%2bAe8IH%2fMUDJ8CFA%2fwcSAAD8PwCjAAAeAP%2fnAb%2bAAIAJwPzjH4D%2fDwAAv%2f%2f%2f%2f%2f%2bH%2f4EfAPEAAPIhQH8AUgAA%2bAEA4gD8f3AAMgAAwAMQIQIDAKEA4JgxADAAMQAAGMmGRYFBAnwAMgIAwA4AMQAA9CEAMABDgIqQ%22%2c%22range%22%3a%7b%22min%22%3a%22%22%2c%22max%22%3a%22FF%22%7d%7d%2c%22orderByItems%22%3a%5b%7b%22item%22%3a1546460115%7d%5d%2c%22rid%22%3a%22nk0tAPmRXDYeAAAAAAAAAA%3d%3d%22%2c%22skipCount%22%3a0%2c%22filter%22%3anull%7d%5d"
+    StartTimestamp:
+      name: start
+      in: query
+      description: Timestamp in epoch seconds specifying the oldest time for which to pull results
+      required: true
+      schema:
+        type: integer
+        format: int64
+    EndTimestamp:
+      name: end
+      in: query
+      description: |
+        Timestamp in epoch seconds specifying the most recent time for which to pull results.  
+        If not provided, defaults to current time.
+      schema:
+        type: integer
+        format: int64
+    UtcOffset:
+      name: utcOffset
+      in: query
+      description: |
+        ### When PUTing a Weekly Schedule
+        A number representing how much the provided schedule is offset from UTC (in seconds).
+
+        This is for convenience sake, so you don't have to adjust your schedule to UTC before submitting
+        the schedule if you don't want to. It's a small pain to do, so if you don't do it, we will do it for you. (We store schedules in UTC.)  
+
+        For example, Saturdays and Sundays at 00:00 UTC-4:00 (Atlantic Standard Time) is Fridays and Saturdays at 20:00 UTC. You have the option
+        of sending that schedule in your preferred time zone with url
+
+        `.../weekly-schedule?utcOffset=-14400`
+
+        and body as
+
+        ```json
+        { 
+          "schedule": [ 
+            {
+              "time": 0, 
+              "days": [true, false, false, false, false, false, true],
+              "storageMode": "charge"
+            } 
+          ] 
+        }
+        ```
+
+        or in UTC time with url
+
+        `.../weekly-schedule?utcOffset=0` or `.../weekly-schedule`
+
+        and body as
+
+        ```json
+        { 
+          "schedule": [ 
+            { 
+              "time": 72000, 
+              "days": [false, false, false, false, false, true, true],
+              "storageMode": "charge" 
+            } 
+          ] 
+        }
+        ```
+
+        ### When GETting a Weekly Schedule
+        A number denoting how much the returned schedule will be offset from UTC time (in seconds).
+      schema:
+        type: integer
+        format: int32
+        default: 0
+  requestBodies:
+    RealtimeStorageScheduleUpdate:
+      description: A storage mode schedule
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/RealtimeStorageSchedule"
+          examples:
+            scheduleUpdateExample:
+              $ref: "#/components/examples/RealtimeStorageScheduleRequestBody"
+    WeeklyStorageScheduleUpdate:
+      description: A weekly storage mode schedule
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/WeeklySchedule"
+          examples:
+            weeklyScheduleUpdateExample:
+              $ref: "#/components/examples/WeeklyScheduleRequestBody"
+  examples:
+    RealtimeStorageScheduleRequestBody:
+      value:
+        schedule:
+          - start: 1577836800
+            end: 1577851200
+            storageMode: "charge"
+          - start: 1577851200
+            end: 1577865600
+            storageMode: "maintain"
+          - start: 1577865600
+            end: 1577880000
+            storageMode: "discharge"
+    WeeklyScheduleRequestBody:
+      value:
+        schedule:
+          - time: 0
+            days: [false, true, true, true, true, true, false]
+            storageMode: "charge"
+          - time: 25200
+            days: [false, true, true, true, true, true, false]
+            storageMode: "discharge"
+          - time: 32400
+            storageMode: "charge"
+            days: [false, true, true, true, true, true, false]
+    RealtimeStorageScheduleResponse:
+      value:
+        href: https://api.stash.energy/utilities/12abcde3-fgh4-5ij6-k7l8-9012345mn678/units/12abcde3-fgh4-5ij6-k7l8-9012345mn678/realtime-schedule
+        schedule:
+          - start: 1577836800
+            end: 1577851200
+            storageMode: "charge"
+          - start: 1577851200
+            end: 1577865600
+            storageMode: "maintain"
+          - start: 1577865600
+            end: 1577880000
+            storageMode: "discharge"
+    WeeklyScheduleResponse:
+      value:
+        href: https://api.stash.energy/utilities/12abcde3-fgh4-5ij6-k7l8-9012345mn678/units/12abcde3-fgh4-5ij6-k7l8-9012345mn678/weekly-schedule
+        utcOffset: 0
+        schedule:
+          - time: 0
+            days: [false, true, true, true, true, true, false]
+            storageMode: "charge"
+          - time: 25200
+            days: [false, true, true, true, true, true, false]
+            storageMode: "discharge"
+          - time: 32400
+            storageMode: "charge"
+            days: [false, true, true, true, true, true, false]
+    BadRequest:
+      value:
+        status: 400
+        code: 40001
+        message: "Could not parse body of request"
+    Forbidden:
+      value:
+        status: 403
+        code: 40301
+        message: You do not have permission to view this resource.
+    NotFound:
+      value:
+        status: 404
+        code: 40401
+        message: "Utility not found: '12abcde3-fgh4-5ij6-k7l8-9012345mn678'"
+    UnprocessableEntity:
+      value:
+        status: 422
+        code: 42201
+        message: Could not process request
+        errors:
+          - property: schedule[0].storageMode
+            message: Value "chrge" is not defined in enum.
+    DeviceUpdateFailed:
+      value:
+        status: 503
+        code: 50301
+        message: Could not update device
