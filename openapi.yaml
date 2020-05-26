@@ -1,11 +1,11 @@
 openapi: "3.0.2"
 info:
   title: Stash Energy Utility API
-  version: 1.5.1
+  version: 0.6.0
   contact:
     name: API Support
     url: https://stash.energy/contact
-    email: info@stash.energy
+    email: dev@stash.energy
   description: |
     # Introduction
 
@@ -52,14 +52,26 @@ info:
 
     All notable changes to this API will be documented in this section
 
-    ## 1.5.1 - 2020-03-04
+    ## 0.6.0 - 2020-05-25
+    ### Added
+    - `maxDemand` property to Unit response
+    - `chargeLimit`, `demand`, and `consumption` properties in State response
+    
+    ### Changed
+    - **BREAKING CHANGE:** Rename `maxCapacity` to `maxCharge` in Unit response
+
+    ### Removed
+    - **BREAKING CHANGE:** `maxChargeRate` property from Unit response
+    - **BREAKING CHANGE:** `chargeRate` property from State response
+
+    ## 0.5.1 - 2020-03-04
     ### Added
     - `firmwareVersion` property in Unit response
 
     ### Removed
     - `unit` expand option from GET Units endpoint (units are now always expanded)
 
-    ## 1.5.0 - 2019-10-17
+    ## 0.5.0 - 2019-10-17
     ### Added
     - `connectionReliability` property in Unit response
     - `start` and `end` properties in Realtime Storage Schedule response
@@ -535,17 +547,17 @@ components:
         firmwareVersion:
           type: string
           readOnly: true
-          description: The unit's Stash firmware version 
-        maxCapacity:
+          description: The unit's Stash firmware version
+        maxCharge:
           type: number
           format: double
           readOnly: true
-          description: Max charge capacity of the storage unit, in kWh
-        maxChargeRate:
+          description: The maximum amount of thermal energy the system can store, converted to electrical units (kWh)
+        maxDemand:
           type: number
           format: double
           readOnly: true
-          description: Max charge rate of the storage unit, in kW
+          description: The maximum electrical demand for the heat pump system, in kW
         state:
           $ref: "#/components/schemas/State"
       example:
@@ -553,18 +565,21 @@ components:
         id: 12abcde3-fgh4-5ij6-k7l8-9012345mn678
         type: M1
         connectionReliability: 89.7
-        firmwareVersion: "1.1.2019102513"
-        maxCapacity: 3.5
-        maxChargeRate: 1.5
+        firmwareVersion: "v1.1.0 (2019102513)"
+        maxCharge: 3.5
+        maxDemand: 1.5
         state:
           href: https://api.stash.energy/utilities/12abcde3-fgh4-5ij6-k7l8-9012345mn678/units/12abcde3-fgh4-5ij6-k7l8-9012345mn678/past-states/12abcde3-fgh4-5ij6-k7l8-9012345mn678
           id: 12abcde3-fgh4-5ij6-k7l8-9012345mn678
           timestamp: 1577836800
           scheduleMode: realtime
           storageMode: charge
-          chargeRate: 1.0
-          dischargeRate: 0.5
-          charge: 3.0
+          chargeLimit:
+            min: 0.0
+            max: 2.0
+          demand: 0.25
+          consumption: 0.0
+          charge: 1.5
           outdoorTemp: 16.5
     PastStates:
       type: object
@@ -609,20 +624,33 @@ components:
           $ref: "#/components/schemas/ScheduleModeEnum"
         storageMode:
           $ref: "#/components/schemas/StorageModeEnum"
-        chargeRate:
-          type: number
-          format: double
-          description: Current charging rate, in kW
+        chargeLimit:
+          type: object
+          description: Based on the forecasted consumption this is the maximum and minimum amounts of energy the system will store (kWh)
           readOnly: true
-        dischargeRate:
+          properties:
+            min:
+              type: number
+              format: double
+              description: The device will not discharge beyond this limit (kWh)
+            max: 
+              type: number
+              format: double
+              description: The device will not charge past this limit (kWh)
+        demand:
           type: number
           format: double
-          description: Current discharge rate, in kW
+          description: The current electrical demand for the heat pump (kW)
+          readOnly: true
+        consumption:
+          type: number
+          format: double
+          description: The current energy demand in the home converted to electrical units (kW)
           readOnly: true
         charge:
           type: number
           format: double
-          description: Current charge level, in kWh
+          description: The amount of thermal energy in the system, converted to its electrical equivalent (kWh)
           readOnly: true
         outdoorTemp:
           type: number
@@ -635,9 +663,12 @@ components:
         timestamp: 1577836800
         scheduleMode: realtime
         storageMode: charge
-        chargeRate: 1.0
-        dischargeRate: 0.5
-        charge: 3.0
+        chargeLimit:
+          min: 0.0
+          max: 2.0
+        demand: 0.25
+        consumption: 0
+        charge: 1.5
         outdoorTemp: 16.5
     StorageModeEnum:
       type: string
