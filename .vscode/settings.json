@@ -1,7 +1,5 @@
 {
   "[yaml]": {
-    "editor.tabSize": 2,
-    "editor.autoIndent": false,
-    "files.trimTrailingWhitespace": false
+    "files.trimTrailingWhitespace": false,
   }
 }

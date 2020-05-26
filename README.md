@@ -6,25 +6,19 @@ Currently we use [ReDoc](https://github.com/Rebilly/ReDoc) to generate the HTML 
 
 ## How to view and/or edit the documentation
 
-### redoc-cli
-
 Prerequisites:
 
-- npx
+- node
+- npm or yarn
 
-#### To view
+### To view
 
-1. `$ npx redoc-cli bundle path/to/openapi.yaml`
+1. `$ yarn build`
 2. Open the generated redoc-static.html file in a web broswer
 
-#### To edit and see live changes while editing
+### To edit and see live changes while editing
 
-1. `$ npx redoc-cli serve path/to/openapi.yaml --watch`
+1. `$ yarn dev`
 2. Open a web browser at the URL specified in the command output
-3. Make changes to the spec and save
-4. The html will automatically be regenerated. Refresh the web page to see updated docs
-
-**Optionally:** Install redoc-cli globally and use the command directly:
-
-1. `$ yarn global add redoc-cli` (or `npm -g install redoc-cli`)
-2. `$ redoc-cli ...`
+3. Make changes to the spec and save it
+4. Refresh the web page to see the updated docs
