@@ -6,7 +6,7 @@
   "license": "MIT",
   "private": false,
   "scripts": {
-    "dev": "npx redoc-cli serve openapi.yaml --watch",
-    "build": "npx redoc-cli bundle openapi.yaml"
+    "dev": "npx redoc-cli serve --watch",
+    "build": "npx redoc-cli bundle --cdn"
   }
 }

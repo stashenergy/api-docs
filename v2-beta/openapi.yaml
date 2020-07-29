@@ -1,7 +1,7 @@
 openapi: "3.0.2"
 info:
-  title: Stash Energy Utility API
-  version: 0.6.0
+  title: Stash Energy API
+  version: v2-beta
   contact:
     name: API Support
     url: https://stash.energy/contact
@@ -9,7 +9,7 @@ info:
   description: |
     # Introduction
 
-    Welcome to the Stash Energy Utility API!
+    Welcome to the Stash Energy API documentation!
 
     If you're interested in integrating your utility management software with
     Stash Energy, please contact us!
@@ -17,7 +17,7 @@ info:
     We currently provide our documentation in the form of an [OpenAPI 3.0.2](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md)
     document.
 
-    # Authentication
+    ## Authentication
 
     Tokens should be made using the OAuth Bearer Token specification,
     using the Authorization header in the request.
@@ -30,7 +30,7 @@ info:
     Authorization: Bearer {token}
     ```
 
-    ## Authentication flow
+    ### Authentication flow
 
     1. Get an `id` and `key` from your Stash Energy representative (one time only)
     2. Send a POST command to [this URL](https://stashapi.b2clogin.com/stashapi.onmicrosoft.com/oauth2/v2.0/token?p=b2c_1_auth&grant_type=password&scope=openid%20032d91df-6ddf-43d3-bcc9-8015d1f5a539&client_id=032d91df-6ddf-43d3-bcc9-8015d1f5a539&response_type=token) with the following parameters in the `x-www-form-urlencoded` format:
@@ -41,69 +41,17 @@ info:
 
     **NOTE: The access token will be valid for 4 hours**
 
-    # API Versions
+    ## Changes from v1
+    Unit Response:
+      - Rename `maxCapacity` property to `maxCharge`
+      - Replace `maxChargeRate` propety with `maxDemand`
 
-    You can specify the version of the API used in the URL. If no version is specified, version 1 will be used:
-
-    `https://api.stash.energy/utilities` for version 1  
-    `https://api.stash.energy/v2/utilities` for version 2 (does not exist currently)
-
-    # CHANGELOG
-
-    All notable changes to this API will be documented in this section
-
-    ## 0.6.0 - 2020-05-25
-    ### Added
-    - `maxDemand` property to Unit response
-    - `chargeLimit`, `demand`, and `consumption` properties in State response
-    
-    ### Changed
-    - **BREAKING CHANGE:** Rename `maxCapacity` to `maxCharge` in Unit response
-
-    ### Removed
-    - **BREAKING CHANGE:** `maxChargeRate` property from Unit response
-    - **BREAKING CHANGE:** `chargeRate` property from State response
-
-    ## 0.5.1 - 2020-03-04
-    ### Added
-    - `firmwareVersion` property in Unit response
-
-    ### Removed
-    - `unit` expand option from GET Units endpoint (units are now always expanded)
-
-    ## 0.5.0 - 2019-10-17
-    ### Added
-    - `connectionReliability` property in Unit response
-    - `start` and `end` properties in Realtime Storage Schedule response
-
-    ### Changed
-    - Auth URL
-    - API version is now specified in the URL as opposed to an Accept header
-    - URLs use dashes instead of underscores
-    - POST endpoints are now PUTs, as they are idempotent updates (sending the same request multiple times will lead to the same result)
-    - Rename `/default_schedule` endpoint to `/weekly-schedule` and changed terminology throughout docs to match
-    - Rename `/schedule` endpoint to `/realtime-schedule` and change terminology throughout docs to match
-    - Realtime schedules now expect a time interval specified with `start` and `end` properties, replacing the single `time` property
-    - Change values of `scheduleMode` enum of state to `weekly` and `realtime` instead of `default`, `programmed`, and `override`
-    - Expect `schedule` property instead of `defaultSchedule` in Weekly Schedule request body.
-    - Rename `utcOffsetInSeconds` property to `utcOffset` in Weekly Schedule response
-    - Rename `utc_offset` query param to `utcOffset` for Weekly Schedule endpoints
-    - Rename `model` property to `type` in Unit response
-    - Improve/fix examples
-
-    ### Removed
-    - Different update modes for Realtime Schedule updates
-    - `/storageMode` endpoint. The same functionality can be acheived with a PUT to the `/realtime-schedule` endpoint
-    - `time` property from Realtime Storage Schedule response
-    - `id` property from User response
-    - `status` property from State response
-    - `chargePercent` property from State response
-    - `uptime` porperty from Unit response
-    - Pagination from `utilities` endpoint
-    - Unused error responses
-
+    State Response:
+      - Replace `chargeRate` property with  `demand`
+      - Replace `dischargeRate` property with `consumption`
+      - Add `chargeLimit` object property
 servers:
-  - url: https://api.stash.energy/
+  - url: https://api.stash.energy/v2-beta
     description: Production Server
 paths:
   /user:
@@ -472,7 +420,7 @@ components:
           description: User's name
           readOnly: true
       example:
-        href: https://api.stash.energy/user
+        href: https://api.stash.energy/v2-beta/user
         name: SpryPoint
     Utilities:
       type: object
@@ -505,7 +453,7 @@ components:
           type: string
           description: Utility's name
       example:
-        href: https://api.stash.energy/utilities/12abcde3-fgh4-5ij6-k7l8-9012345mn678
+        href: https://api.stash.energy/v2-beta/utilities/12abcde3-fgh4-5ij6-k7l8-9012345mn678
         id: 12abcde3-fgh4-5ij6-k7l8-9012345mn678
         name: Stash Electric
     Units:
@@ -561,7 +509,7 @@ components:
         state:
           $ref: "#/components/schemas/State"
       example:
-        href: https://api.stash.energy/utilities/12abcde3-fgh4-5ij6-k7l8-9012345mn678/units/12abcde3-fgh4-5ij6-k7l8-9012345mn678
+        href: https://api.stash.energy/v2-beta/utilities/12abcde3-fgh4-5ij6-k7l8-9012345mn678/units/12abcde3-fgh4-5ij6-k7l8-9012345mn678
         id: 12abcde3-fgh4-5ij6-k7l8-9012345mn678
         type: M1
         connectionReliability: 89.7
@@ -569,7 +517,7 @@ components:
         maxCharge: 3.5
         maxDemand: 1.5
         state:
-          href: https://api.stash.energy/utilities/12abcde3-fgh4-5ij6-k7l8-9012345mn678/units/12abcde3-fgh4-5ij6-k7l8-9012345mn678/past-states/12abcde3-fgh4-5ij6-k7l8-9012345mn678
+          href: https://api.stash.energy/v2-beta/utilities/12abcde3-fgh4-5ij6-k7l8-9012345mn678/units/12abcde3-fgh4-5ij6-k7l8-9012345mn678/past-states/12abcde3-fgh4-5ij6-k7l8-9012345mn678
           id: 12abcde3-fgh4-5ij6-k7l8-9012345mn678
           timestamp: 1577836800
           scheduleMode: realtime
@@ -633,7 +581,7 @@ components:
               type: number
               format: double
               description: The device will not discharge beyond this limit (kWh)
-            max: 
+            max:
               type: number
               format: double
               description: The device will not charge past this limit (kWh)
@@ -658,7 +606,7 @@ components:
           description: The outdoor ambient temperature
           readOnly: true
       example:
-        href: https://api.stash.energy/utilities/12abcde3-fgh4-5ij6-k7l8-9012345mn678/units/12abcde3-fgh4-5ij6-k7l8-9012345mn678/past-states/12abcde3-fgh4-5ij6-k7l8-9012345mn678
+        href: https://api.stash.energy/v2-beta/utilities/12abcde3-fgh4-5ij6-k7l8-9012345mn678/units/12abcde3-fgh4-5ij6-k7l8-9012345mn678/past-states/12abcde3-fgh4-5ij6-k7l8-9012345mn678
         id: 12abcde3-fgh4-5ij6-k7l8-9012345mn678
         timestamp: 1577836800
         scheduleMode: realtime
@@ -723,9 +671,11 @@ components:
       type: string
       description: |
         Describes the schedule mode of the unit. The allowed values are:
+        * "off": The unit is not using a schedule and the storage mode will be set to "maintain"
         * "weekly": The unit is using its weekly schedule to determine its storage mode
         * "realtime": The unit is using the provided real-time schedule to determine its storage mode
       enum:
+        - off
         - weekly
         - realtime
     StorageEvent:
@@ -796,7 +746,7 @@ components:
       example:
         total: 50
         limit: 50
-        next: https://api.stash.energy/.../limit=50&page=RID:nk0tAPmRXDZ9AQAAAAAAAA==|RT:1|TRC:366|RTD:dLPB1xKK7cA=|FPC:AQ8AAAAAAAAAfQEAAAAAAAA=
+        next: https://api.stash.energy/v2-beta/.../limit=50&page=RID:nk0tAPmRXDZ9AQAAAAAAAA==|RT:1|TRC:366|RTD:dLPB1xKK7cA=|FPC:AQ8AAAAAAAAAfQEAAAAAAAA=
     BadRequest:
       $ref: "#/components/schemas/Error"
     Unauthorized:
@@ -1032,7 +982,7 @@ components:
             days: [false, true, true, true, true, true, false]
     RealtimeStorageScheduleResponse:
       value:
-        href: https://api.stash.energy/utilities/12abcde3-fgh4-5ij6-k7l8-9012345mn678/units/12abcde3-fgh4-5ij6-k7l8-9012345mn678/realtime-schedule
+        href: https://api.stash.energy/v2-beta/utilities/12abcde3-fgh4-5ij6-k7l8-9012345mn678/units/12abcde3-fgh4-5ij6-k7l8-9012345mn678/realtime-schedule
         schedule:
           - start: 1577836800
             end: 1577851200
@@ -1045,7 +995,7 @@ components:
             storageMode: "discharge"
     WeeklyScheduleResponse:
       value:
-        href: https://api.stash.energy/utilities/12abcde3-fgh4-5ij6-k7l8-9012345mn678/units/12abcde3-fgh4-5ij6-k7l8-9012345mn678/weekly-schedule
+        href: https://api.stash.energy/v2-beta/utilities/12abcde3-fgh4-5ij6-k7l8-9012345mn678/units/12abcde3-fgh4-5ij6-k7l8-9012345mn678/weekly-schedule
         utcOffset: 0
         schedule:
           - time: 0
