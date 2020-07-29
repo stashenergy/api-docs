@@ -13,12 +13,12 @@ Prerequisites:
 
 ### To view
 
-1. `$ yarn build <path/to/openapi.yaml> # ex: yarn build v1/openapi.yaml`
+1. `$ yarn build <path/to/openapi.yaml> # ex: yarn build versions/v1/openapi.yaml`
 2. Open the generated redoc-static.html file in a web broswer
 
 ### To edit and see live changes while editing
 
-1. `$ yarn dev <path/to/openapi.yaml> # ex: yarn dev v2-beta/openapi.yaml`
+1. `$ yarn dev <path/to/openapi.yaml> # ex: yarn dev versions/v2-beta/openapi.yaml`
 2. Open a web browser at the URL specified in the command output
 3. Make changes to the spec and save it
 4. Refresh the web page to see the updated docs
