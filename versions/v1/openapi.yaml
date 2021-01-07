@@ -9,6 +9,10 @@ info:
   description: |
     # Introduction
 
+    **NOTE:** We strongly suggest that developers use the new v2-beta API, even though it is in beta. 
+    The storage terminology is clearer and will hopefully ease development.
+    We will notify users when the stable version is available.
+
     Welcome to the Stash Energy API documentation!
 
     If you're interested in integrating your utility management software with
