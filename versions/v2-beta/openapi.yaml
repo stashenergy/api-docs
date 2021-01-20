@@ -42,14 +42,14 @@ info:
     **NOTE: The access token will be valid for 4 hours**
 
     ## Changes from v1
-    Unit Response:
-      - Rename `maxCapacity` property to `maxCharge`
-      - Replace `maxChargeRate` propety with `maxDemand`
-
-    State Response:
-      - Replace `chargeRate` property with  `demand`
-      - Replace `dischargeRate` property with `consumption`
-      - Add `chargeLimit` object property
+    - Unit Response:
+       - Rename `maxCapacity` property to `maxCharge`
+       - Replace `maxChargeRate` propety with `maxDemand`
+    - State Response:
+       - Replace `chargeRate` property with  `demand`
+       - Replace `dischargeRate` property with `consumption`
+       - Add `chargeLimit` object property
+    - Add `research` query param option to endpoints that return unit state
 servers:
   - url: https://api.stash.energy/v2-beta
     description: Production Server
@@ -119,6 +119,7 @@ paths:
       - $ref: "#/components/parameters/Limit"
       - $ref: "#/components/parameters/Page"
       - $ref: "#/components/parameters/Expand"
+      - $ref: "#/components/parameters/Research"
     get:
       tags:
         - Units
@@ -147,6 +148,7 @@ paths:
     parameters:
       - $ref: "#/components/parameters/Utility"
       - $ref: "#/components/parameters/Unit"
+      - $ref: "#/components/parameters/Research"
     get:
       tags:
         - Units
@@ -176,6 +178,7 @@ paths:
       - $ref: "#/components/parameters/EndTimestamp"
       - $ref: "#/components/parameters/Limit"
       - $ref: "#/components/parameters/Page"
+      - $ref: "#/components/parameters/Research"
     get:
       tags:
         - Units
@@ -206,6 +209,7 @@ paths:
       - $ref: "#/components/parameters/Utility"
       - $ref: "#/components/parameters/Unit"
       - $ref: "#/components/parameters/State"
+      - $ref: "#/components/parameters/Research"
     get:
       tags:
         - Units
@@ -802,12 +806,28 @@ components:
       name: expand
       in: query
       description: |
-        A comma separated list of propert(y|ies) you wish to expand in the response (that otherwise would not be provided).
+        A comma separated list of propert(y|ies) you wish to expand in the response (that otherwise would not be provided).  
         Currently only valid for the `/units` endpoint.
       schema:
         type: array
         items:
           type: string
+    Research:
+      name: research
+      in: query
+      description: |
+        A non-zero value expresses interest in getting state that has additional properties that can be used for research purposes.  
+        Only available for certain units that allow it.
+      schema:
+        type: integer
+        default: 0
+      examples:
+        none:
+          value: 0
+          description: Request normal state (same as omitting the query parameter)
+        one:
+          value: 1
+          description: Request state with additional properties (any non-zero value will do)
     Utility:
       name: utilityId
       in: path
@@ -858,7 +878,7 @@ components:
       name: page
       in: query
       description: |
-        An API-generated token that will be provided to you if your previous request was paged and there are one or more pages remaining.
+        An opaque, API-generated token that will be provided to you if your previous request was paged and there are one or more pages remaining.
       schema:
         type: string
       examples:
