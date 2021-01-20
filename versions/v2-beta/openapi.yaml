@@ -163,7 +163,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Unit"
+                $ref: "#/components/schemas/UnitWithState"
         "401":
           $ref: "#/components/responses/Unauthorized"
         "404":
@@ -222,7 +222,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/State"
+                oneOf:
+                  - $ref: "#/components/schemas/State"
+                  - $ref: "#/components/schemas/ExtendedState"
         "401":
           $ref: "#/components/responses/Unauthorized"
         "404":
@@ -473,7 +475,9 @@ components:
         units:
           type: array
           items:
-            $ref: "#/components/schemas/Unit"
+            oneOf:
+              - $ref: "#/components/schemas/UnitWithState"
+              - $ref: "#/components/schemas/Unit"
           description: List of units
     Unit:
       type: object
@@ -483,56 +487,50 @@ components:
           format: uri
           description: URL to self
           readOnly: true
+          example: https://api.stash.energy/v2-beta/utilities/12abcde3-fgh4-5ij6-k7l8-9012345mn678/units/12abcde3-fgh4-5ij6-k7l8-9012345mn678
         id:
           type: string
           readOnly: true
           description: Unit's ID
+          example: 12abcde3-fgh4-5ij6-k7l8-9012345mn678
         type:
           type: string
           readOnly: true
           description: The type of storage unit, e.g. M1
+          example: M1
         connectionReliability:
           type: number
           format: double
           readOnly: true
           description: How likely the device is to be connected to the Internet (0.0 - 100.0)
+          example: 89.7
         firmwareVersion:
           type: string
           readOnly: true
           description: The unit's Stash firmware version
+          example: v1.1.0 (2019102513)
         maxCharge:
           type: number
           format: double
           readOnly: true
           description: The maximum amount of thermal energy the system can store, converted to electrical units (kWh)
+          example: 3.5
         maxDemand:
           type: number
           format: double
           readOnly: true
           description: The maximum electrical demand for the heat pump system, in kW
-        state:
-          $ref: "#/components/schemas/State"
-      example:
-        href: https://api.stash.energy/v2-beta/utilities/12abcde3-fgh4-5ij6-k7l8-9012345mn678/units/12abcde3-fgh4-5ij6-k7l8-9012345mn678
-        id: 12abcde3-fgh4-5ij6-k7l8-9012345mn678
-        type: M1
-        connectionReliability: 89.7
-        firmwareVersion: "v1.1.0 (2019102513)"
-        maxCharge: 3.5
-        maxDemand: 1.5
-        state:
-          href: https://api.stash.energy/v2-beta/utilities/12abcde3-fgh4-5ij6-k7l8-9012345mn678/units/12abcde3-fgh4-5ij6-k7l8-9012345mn678/past-states/12abcde3-fgh4-5ij6-k7l8-9012345mn678
-          id: 12abcde3-fgh4-5ij6-k7l8-9012345mn678
-          timestamp: 1577836800
-          scheduleMode: realtime
-          storageMode: charge
-          chargeLimit:
-            min: 0.0
-            max: 2.0
-          demand: 0.25
-          consumption: 0.0
-          charge: 1.5
-          outdoorTemp: 16.5
+          example: 1.5
+    UnitWithState:
+      allOf:
+        - $ref: "#/components/schemas/Unit"
+        - type: object
+          readOnly: true
+          properties:
+            state:
+              oneOf:
+                - $ref: "#/components/schemas/State"
+                - $ref: "#/components/schemas/ExtendedState"
     PastStates:
       type: object
       readOnly: true
@@ -554,7 +552,9 @@ components:
         pastStates:
           type: array
           items:
-            $ref: "#/components/schemas/State"
+            oneOf:
+              - $ref: "#/components/schemas/State"
+              - $ref: "#/components/schemas/ExtendedState"
           description: List of past states
     State:
       type: object
@@ -565,13 +565,16 @@ components:
           type: string
           format: uri
           description: Link to self
+          example: https://api.stash.energy/v2-beta/utilities/12abcde3-fgh4-5ij6-k7l8-9012345mn678/units/12abcde3-fgh4-5ij6-k7l8-9012345mn678/past-states/12abcde3-fgh4-5ij6-k7l8-9012345mn678
         id:
           type: string
           description: State ID
+          example: "12abcde3-fgh4-5ij6-k7l8-9012345mn678"
         timestamp:
           type: integer
           format: int64
           description: Timestamp in epoch seconds of when this state was recorded
+          example: 1577836801
         scheduleMode:
           $ref: "#/components/schemas/ScheduleModeEnum"
         storageMode:
@@ -585,43 +588,84 @@ components:
               type: number
               format: double
               description: The device will not discharge beyond this limit (kWh)
+              example: 0.0
             max:
               type: number
               format: double
               description: The device will not charge past this limit (kWh)
+              example: 2.0
         demand:
           type: number
           format: double
           description: The current electrical demand for the heat pump (kW)
           readOnly: true
+          example: 1.25
         consumption:
           type: number
           format: double
           description: The current energy demand in the home converted to electrical units (kW)
           readOnly: true
+          example: 0.0
         charge:
           type: number
           format: double
           description: The amount of thermal energy in the system, converted to its electrical equivalent (kWh)
           readOnly: true
+          example: 1.5
         outdoorTemp:
           type: number
           format: double
           description: The outdoor ambient temperature
           readOnly: true
-      example:
-        href: https://api.stash.energy/v2-beta/utilities/12abcde3-fgh4-5ij6-k7l8-9012345mn678/units/12abcde3-fgh4-5ij6-k7l8-9012345mn678/past-states/12abcde3-fgh4-5ij6-k7l8-9012345mn678
-        id: 12abcde3-fgh4-5ij6-k7l8-9012345mn678
-        timestamp: 1577836800
-        scheduleMode: realtime
-        storageMode: charge
-        chargeLimit:
-          min: 0.0
-          max: 2.0
-        demand: 0.25
-        consumption: 0
-        charge: 1.5
-        outdoorTemp: 16.5
+          example: 16.5
+    ExtendedState:
+      allOf:
+        - $ref: "#/components/schemas/State"
+        - type: object
+          readOnly: true
+          properties:
+            indoorTemp:
+              type: number
+              description: The ambient indoor temperature as recorded by the unit
+              readOnly: true
+              example: 21.5
+            indoorOutTemp:
+              type: number
+              description: The temperature of the air exiting the unit
+              readOnly: true
+              example: 30.0
+            indoorFanSpeed:
+              type: integer
+              description: Percentage of how fast the indoor fan is running
+              minimum: 0
+              maximum: 100
+              readOnly: true
+              example: 75
+            outdoorFanSpeed:
+              type: integer
+              description: Percentage of how fast the outdoor heat pump fan is running
+              minimum: 0
+              maximum: 100
+              readOnly: true
+              example: 0
+            compressorSpeed:
+              type: integer
+              description: Percentage of how fast the compressor is running
+              minimum: 0
+              maximum: 100
+              readOnly: true
+              example: 0
+            defrost:
+              type: integer
+              description: Whether or not the heat pump is defrosting (0 - no, 1 - yes)
+              minimum: 0
+              maximum: 1
+              example: 0
+            setpoint:
+              type: number
+              description: The user-set setpoint
+              readOnly: true
+              example: 23.5
     StorageModeEnum:
       type: string
       description: |
@@ -824,10 +868,10 @@ components:
       examples:
         none:
           value: 0
-          description: Request normal state (same as omitting the query parameter)
+          summary: Request normal state (same as omitting the query parameter)
         one:
           value: 1
-          description: Request state with additional properties (any non-zero value will do)
+          summary: Request state with additional properties (any non-zero value will do)
     Utility:
       name: utilityId
       in: path
