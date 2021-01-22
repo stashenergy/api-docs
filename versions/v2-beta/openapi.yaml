@@ -224,7 +224,7 @@ paths:
               schema:
                 oneOf:
                   - $ref: "#/components/schemas/State"
-                  - $ref: "#/components/schemas/ExtendedState"
+                  - $ref: "#/components/schemas/ResearchState"
         "401":
           $ref: "#/components/responses/Unauthorized"
         "404":
@@ -530,7 +530,7 @@ components:
             state:
               oneOf:
                 - $ref: "#/components/schemas/State"
-                - $ref: "#/components/schemas/ExtendedState"
+                - $ref: "#/components/schemas/ResearchState"
     PastStates:
       type: object
       readOnly: true
@@ -554,7 +554,7 @@ components:
           items:
             oneOf:
               - $ref: "#/components/schemas/State"
-              - $ref: "#/components/schemas/ExtendedState"
+              - $ref: "#/components/schemas/ResearchState"
           description: List of past states
     State:
       type: object
@@ -618,7 +618,7 @@ components:
           description: The outdoor ambient temperature
           readOnly: true
           example: 16.5
-    ExtendedState:
+    ResearchState:
       allOf:
         - $ref: "#/components/schemas/State"
         - type: object
