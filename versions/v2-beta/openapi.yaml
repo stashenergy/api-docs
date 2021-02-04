@@ -687,6 +687,9 @@ components:
           description: A list of times to change the unit's storage mode
           items:
             $ref: "#/components/schemas/StorageEvent"
+      required:
+        - href
+        - schedule
     WeeklySchedule:
       type: object
       description: |
