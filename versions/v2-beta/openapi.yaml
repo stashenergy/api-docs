@@ -595,17 +595,17 @@ components:
               example: 2.0
         demand:
           type: number
-          description: The current electrical demand for the heat pump (kW)
+          description: The electrical energy the heat pump is using (kW)
           readOnly: true
           example: 1.25
         consumption:
           type: number
-          description: The current energy demand in the home converted to electrical units (kW)
+          description: The thermal energy going into the home, converted to its electrical equivalent (kW)
           readOnly: true
           example: 0.0
         charge:
           type: number
-          description: The amount of thermal energy in the system, converted to its electrical equivalent (kWh)
+          description: The amount of thermal energy stored in the unit, converted to its electrical equivalent (kWh)
           readOnly: true
           example: 1.5
         outdoorTemp:
