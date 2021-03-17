@@ -853,7 +853,7 @@ components:
       name: research
       in: query
       description: |
-        A non-zero value expresses interest in getting state that has additional properties that can be used for research purposes.  
+        A value of `1` expresses interest in getting state that has additional properties that can be used for research purposes.  
         Only available for certain units that allow it.
       schema:
         type: integer
@@ -864,7 +864,7 @@ components:
           summary: Request normal state (same as omitting the query parameter)
         one:
           value: 1
-          summary: Request state with additional properties (any non-zero value will do)
+          summary: Request state with additional properties
     Utility:
       name: utilityId
       in: path
