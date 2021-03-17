@@ -169,7 +169,6 @@ paths:
       - $ref: "#/components/parameters/StartTimestamp"
       - $ref: "#/components/parameters/EndTimestamp"
       - $ref: "#/components/parameters/Limit"
-      - $ref: "#/components/parameters/Page"
     get:
       tags:
         - Units
