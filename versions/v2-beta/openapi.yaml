@@ -177,7 +177,6 @@ paths:
       - $ref: "#/components/parameters/StartTimestamp"
       - $ref: "#/components/parameters/EndTimestamp"
       - $ref: "#/components/parameters/Limit"
-      - $ref: "#/components/parameters/Page"
       - $ref: "#/components/parameters/Research"
     get:
       tags:
@@ -784,7 +783,6 @@ components:
           type: string
           format: uri
           description: URL to the next page of results. This property is not present if not applicable
-          example: https://api.stash.energy/v2-beta/.../limit=50&page=RID:nk0tAPmRXDZ9AQAAAAAAAA==|RT:1|TRC:366|RTD:dLPB1xKK7cA=|FPC:AQ8AAAAAAAAAfQEAAAAAAAA=
       required:
         - total
         - limit
@@ -912,7 +910,6 @@ components:
         An opaque, API-generated token that will be provided to you if your previous request was paged and there are one or more pages remaining.
       schema:
         type: string
-      example: "%5b%7b%22compositeToken%22%3a%7b%22token%22%3a%22%2bRID%3ank0tAPmRXDYeAAAAAAAAAA%3d%3d%23RT%3a1%23TRC%3a14%23RTD%3adLPB1wtG9MA%3d%23ISV%3a1%23FPC%3aAgEAAACkABEAAMCxQQAQIQQGADYA%2fv8PgAP%2f8wCAf%2bD%2fEUB%2fMCEAAHwSAAB6eABEAAjAA%2bAe8IH%2fMUDJ8CFA%2fwcSAAD8PwCjAAAeAP%2fnAb%2bAAIAJwPzjH4D%2fDwAAv%2f%2f%2f%2f%2f%2bH%2f4EfAPEAAPIhQH8AUgAA%2bAEA4gD8f3AAMgAAwAMQIQIDAKEA4JgxADAAMQAAGMmGRYFBAnwAMgIAwA4AMQAA9CEAMABDgIqQ%22%2c%22range%22%3a%7b%22min%22%3a%22%22%2c%22max%22%3a%22FF%22%7d%7d%2c%22orderByItems%22%3a%5b%7b%22item%22%3a1546460115%7d%5d%2c%22rid%22%3a%22nk0tAPmRXDYeAAAAAAAAAA%3d%3d%22%2c%22skipCount%22%3a0%2c%22filter%22%3anull%7d%5d"
     StartTimestamp:
       name: start
       in: query
