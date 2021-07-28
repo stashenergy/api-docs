@@ -6,7 +6,10 @@
   "license": "MIT",
   "private": false,
   "scripts": {
-    "dev": "pnpx redoc-cli serve --watch",
-    "build": "pnpx redoc-cli bundle --cdn"
+    "dev": "redoc-cli serve --watch",
+    "build": "redoc-cli bundle --cdn"
+  },
+  "devDependencies": {
+    "redoc-cli": "^0.12.2"
   }
 }
