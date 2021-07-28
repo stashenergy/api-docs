@@ -6,7 +6,7 @@
   "license": "MIT",
   "private": false,
   "scripts": {
-    "dev": "npx redoc-cli serve --watch",
-    "build": "npx redoc-cli bundle --cdn"
+    "dev": "pnpx redoc-cli serve --watch",
+    "build": "pnpx redoc-cli bundle --cdn"
   }
 }
