@@ -410,7 +410,7 @@ components:
           readOnly: true
       example:
         href: https://api.stash.energy/user
-        name: SpryPoint
+        name: Username
     Utilities:
       type: object
       readOnly: true
