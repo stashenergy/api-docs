@@ -499,7 +499,7 @@ components:
           type: number
           readOnly: true
           description: |
-            Deprecated: use `maxCharge` instead
+            Deprecated: use `maxCharge` instead.  
             Max charge capacity of the storage unit, in kWh.
           deprecated: true
         maxCharge:
@@ -512,7 +512,7 @@ components:
           format: double
           readOnly: true
           description: |
-            Deprecated: use `maxDemand` instead
+            Deprecated: use `maxDemand` instead.  
             Max charge rate of the storage unit, in kW
           deprecated: true
         maxDemand:
@@ -595,7 +595,7 @@ components:
           type: number
           format: double
           description: |
-            Deprecated - use `demand` instead
+            Deprecated - use `demand` instead.  
             Current charging rate, in kW
           readOnly: true
           deprecated: true
@@ -608,7 +608,7 @@ components:
           type: number
           format: double
           description: |
-            Deprecated - use `consumption` instead
+            Deprecated - use `consumption` instead.  
             Current discharge rate, in kW
           readOnly: true
         consumption:
