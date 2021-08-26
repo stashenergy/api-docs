@@ -36,7 +36,7 @@ info:
     ### Authentication flow
 
     1. Get an `id` and `key` from your Stash Energy representative (one time only)
-    2. Send a POST command to [this URL](https://stashapi.b2clogin.com/stashapi.onmicrosoft.com/oauth2/v2.0/token?p=b2c_1_auth&grant_type=password&scope=openid%20032d91df-6ddf-43d3-bcc9-8015d1f5a539&client_id=032d91df-6ddf-43d3-bcc9-8015d1f5a539&response_type=token) with the following parameters in the `x-www-form-urlencoded` format:
+    2. Send a POST command to [this URL](https://auth.api.stash.energy/60658de9-a14c-4bb9-8dc5-26d1bd003872/oauth2/v2.0/token?p=b2c_1_auth&grant_type=password&scope=openid%20032d91df-6ddf-43d3-bcc9-8015d1f5a539&client_id=032d91df-6ddf-43d3-bcc9-8015d1f5a539&response_type=token) with the following parameters in the `x-www-form-urlencoded` format:
         * username = `<id>`
         * password = `<key>`
     3. Retrieve the access token from the `access_token` property of the JSON response
