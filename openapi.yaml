@@ -17,7 +17,7 @@ info:
     If you're interested in integrating your utility management software with
     Stash Energy, please contact us!
 
-    We currently provide our documentation in the form of an [OpenAPI 3.0.2](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md)
+    We currently provide our documentation in the form of an [OpenAPI 3.1.0](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md)
     document.
 
     ## Authentication
