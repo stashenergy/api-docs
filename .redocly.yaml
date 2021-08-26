@@ -1,0 +1,10 @@
+apiDefinitions:
+  # a set of named keys and values of entrypoints to OpenAPI definitions.
+  stash-api: ./openapi.yaml
+
+lint:
+  extends:
+    - recommended
+
+referenceDocs:
+  # the API reference docs options, including theme options.
