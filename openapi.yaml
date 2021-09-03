@@ -1,7 +1,10 @@
-openapi: "3.0.2"
+openapi: "3.1.0"
 info:
   title: Stash Energy API
-  version: v2-beta
+  license:
+    name: ""
+    url: "#"
+  version: ""
   contact:
     name: API Support
     url: https://stash.energy/contact
@@ -14,7 +17,7 @@ info:
     If you're interested in integrating your utility management software with
     Stash Energy, please contact us!
 
-    We currently provide our documentation in the form of an [OpenAPI 3.0.2](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md)
+    We currently provide our documentation in the form of an [OpenAPI 3.1.0](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md)
     document.
 
     ## Authentication
@@ -33,25 +36,15 @@ info:
     ### Authentication flow
 
     1. Get an `id` and `key` from your Stash Energy representative (one time only)
-    2. Send a POST command to [this URL](https://stashapi.b2clogin.com/stashapi.onmicrosoft.com/oauth2/v2.0/token?p=b2c_1_auth&grant_type=password&scope=openid%20032d91df-6ddf-43d3-bcc9-8015d1f5a539&client_id=032d91df-6ddf-43d3-bcc9-8015d1f5a539&response_type=token) with the following parameters in the `x-www-form-urlencoded` format:
+    2. Send a POST command to [this URL](https://auth.api.stash.energy/60658de9-a14c-4bb9-8dc5-26d1bd003872/oauth2/v2.0/token?p=b2c_1_auth&grant_type=password&scope=openid%20032d91df-6ddf-43d3-bcc9-8015d1f5a539&client_id=032d91df-6ddf-43d3-bcc9-8015d1f5a539&response_type=token) with the following parameters in the `x-www-form-urlencoded` format:
         * username = `<id>`
         * password = `<key>`
     3. Retrieve the access token from the `access_token` property of the JSON response
     4. Use this token to authenticate your API requests. (Include it in the Authorization header)
 
     **NOTE: The access token will be valid for 4 hours**
-
-    ## Changes from v1
-    - Unit Response:
-       - Rename `maxCapacity` property to `maxCharge`
-       - Replace `maxChargeRate` propety with `maxDemand`
-    - State Response:
-       - Replace `chargeRate` property with  `demand`
-       - Replace `dischargeRate` property with `consumption`
-       - Add `chargeLimit` object property
-    - Add `research` query param option to endpoints that return unit state
 servers:
-  - url: https://api.stash.energy/v2-beta
+  - url: https://api.stash.energy
     description: Production Server
 paths:
   /user:
@@ -370,15 +363,6 @@ components:
         text/plain:
           schema:
             $ref: "#/components/schemas/Unauthorized"
-    Forbidden: # 403
-      description: FORBIDDEN
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/Forbidden"
-          examples:
-            one:
-              $ref: "#/components/examples/Forbidden"
     NotFound: # 404
       description: NOT_FOUND
       content:
@@ -420,13 +404,14 @@ components:
           type: string
           format: uri
           description: Link to self
+          examples:
+            - https://api.stash.energy/user
         name:
           type: string
           description: User's name
           readOnly: true
-      example:
-        href: https://api.stash.energy/v2-beta/user
-        name: SpryPoint
+          examples:
+            - Username
     Utilities:
       type: object
       readOnly: true
@@ -436,7 +421,8 @@ components:
           format: uri
           description: Link to self
           readOnly: true
-          example: https://api.stash.energy/v2-beta/utilities
+          examples:
+            - https://api.stash.energy/utilities
         pagination:
           $ref: "#/components/schemas/Pagination"
         utilities:
@@ -452,16 +438,19 @@ components:
           format: uri
           description: Link to self
           readOnly: true
-          example: https://api.stash.energy/v2-beta/utilities/12abcde3-fgh4-5ij6-k7l8-9012345mn678
+          examples:
+            - https://api.stash.energy/utilities/12abcde3-fgh4-5ij6-k7l8-9012345mn678
         id:
           type: string
           readOnly: true
           description: Utility ID (GUID)
-          example: 12abcde3-fgh4-5ij6-k7l8-9012345mn678
+          examples:
+            - 12abcde3-fgh4-5ij6-k7l8-9012345mn678
         name:
           type: string
           description: Utility's name
-          example: Stash Electric
+          examples:
+            - Stash Electric
     Units:
       type: object
       readOnly: true
@@ -470,7 +459,8 @@ components:
           type: string
           format: uri
           description: Link to self
-          example: https://api.stash.energy/v2-beta/utilities/12abcde3-fgh4-5ij6-k7l8-9012345mn678/units
+          examples:
+            - https://api.stash.energy/utilities/12abcde3-fgh4-5ij6-k7l8-9012345mn678/units
         pagination:
           $ref: "#/components/schemas/Pagination"
         units:
@@ -488,39 +478,61 @@ components:
           format: uri
           description: URL to self
           readOnly: true
-          example: https://api.stash.energy/v2-beta/utilities/12abcde3-fgh4-5ij6-k7l8-9012345mn678/units/ac57ae8227db0eb6977413961b6168a02dd59b59f2d78215908a1a04adc95fde0762fe1a107a795b2842fc91e43d7b50a4827765f757eae1a9a72232368b9788
+          examples:
+            - https://api.stash.energy/utilities/12abcde3-fgh4-5ij6-k7l8-9012345mn678/units/ac57ae8227db0eb6977413961b6168a02dd59b59f2d78215908a1a04adc95fde0762fe1a107a795b2842fc91e43d7b50a4827765f757eae1a9a72232368b9788
         id:
           type: string
           readOnly: true
           description: Unit's ID
-          example: ac57ae8227db0eb6977413961b6168a02dd59b59f2d78215908a1a04adc95fde0762fe1a107a795b2842fc91e43d7b50a4827765f757eae1a9a72232368b9788
+          examples:
+            - ac57ae8227db0eb6977413961b6168a02dd59b59f2d78215908a1a04adc95fde0762fe1a107a795b2842fc91e43d7b50a4827765f757eae1a9a72232368b9788
         type:
           type: string
           readOnly: true
           description: The type of storage unit, e.g. M1
-          example: M1
+          examples:
+            - M1
         connectionReliability:
           type: number
           readOnly: true
           description: Percentage of how likely the device is to be connected to the Internet (%)
           minimum: 0.0
           maximum: 100.0
-          example: 89.7
+          examples:
+            - 89.7
         firmwareVersion:
           type: string
           readOnly: true
           description: The unit's Stash firmware version
-          example: v1.1.0 (2019102513)
+          examples:
+            - v1.1.0 (2019102513)
+        maxCapacity:
+          type: number
+          readOnly: true
+          description: |
+            Deprecated: use `maxCharge` instead.  
+            Max charge capacity of the storage unit, in kWh.
+          deprecated: true
         maxCharge:
           type: number
           readOnly: true
           description: The maximum amount of thermal energy the system can store, converted to electrical units (kWh)
-          example: 3.5
+          examples:
+            - 3.5
+        maxChargeRate:
+          type: number
+          format: double
+          readOnly: true
+          description: |
+            Deprecated: use `maxDemand` instead.  
+            Max charge rate of the storage unit, in kW
+          deprecated: true
         maxDemand:
           type: number
           readOnly: true
           description: The maximum electrical demand for the heat pump system (kW)
-          example: 1.5
+          examples:
+            - 1.5
     UnitWithState:
       allOf:
         - $ref: "#/components/schemas/Unit"
@@ -539,15 +551,18 @@ components:
           type: string
           format: uri
           description: Link to self
-          example: https://api.stash.energy/v2-beta/utilities/12abcde3-fgh4-5ij6-k7l8-9012345mn678/units/ac57ae8227db0eb6977413961b6168a02dd59b59f2d78215908a1a04adc95fde0762fe1a107a795b2842fc91e43d7b50a4827765f757eae1a9a72232368b9788/past-states
+          examples:
+            - https://api.stash.energy/utilities/12abcde3-fgh4-5ij6-k7l8-9012345mn678/units/ac57ae8227db0eb6977413961b6168a02dd59b59f2d78215908a1a04adc95fde0762fe1a107a795b2842fc91e43d7b50a4827765f757eae1a9a72232368b9788/past-states
         start:
           type: integer
           description: Start timestamp in epoch seconds that was provided in the request query parameters
-          example: 1577836800
+          examples:
+            - 1577836800
         end:
           type: integer
           description: End timestamp in epoch seconds that was provided in the request query parameters. If it was not provided, it is the timestamp of when the request was received
-          example: 1577851200
+          examples:
+            - 1577851200
         pagination:
           $ref: "#/components/schemas/Pagination"
         pastStates:
@@ -566,15 +581,18 @@ components:
           type: string
           format: uri
           description: Link to self
-          example: https://api.stash.energy/v2-beta/utilities/12abcde3-fgh4-5ij6-k7l8-9012345mn678/units/12abcde3-fgh4-5ij6-k7l8-9012345mn678/past-states/12abcde3-fgh4-5ij6-k7l8-9012345mn678
+          examples:
+            - https://api.stash.energy/utilities/12abcde3-fgh4-5ij6-k7l8-9012345mn678/units/12abcde3-fgh4-5ij6-k7l8-9012345mn678/past-states/12abcde3-fgh4-5ij6-k7l8-9012345mn678
         id:
           type: string
           description: State ID (GUID)
-          example: "12abcde3-fgh4-5ij6-k7l8-9012345mn678"
+          examples:
+            - "12abcde3-fgh4-5ij6-k7l8-9012345mn678"
         timestamp:
           type: integer
           description: Timestamp in epoch seconds of when this state was recorded
-          example: 1577836801
+          examples:
+            - 1577836801
         scheduleMode:
           $ref: "#/components/schemas/ScheduleModeEnum"
         storageMode:
@@ -587,31 +605,52 @@ components:
             min:
               type: number
               description: The device will not discharge beyond this limit (kWh)
-              example: 0.0
+              examples:
+                - 0.0
             max:
               type: number
               description: The device will not charge past this limit (kWh)
-              example: 2.0
+              examples:
+                - 2.0
+        chargeRate:
+          type: number
+          format: double
+          description: |
+            Deprecated - use `demand` instead.  
+            Current charging rate, in kW
+          readOnly: true
+          deprecated: true
         demand:
           type: number
           description: The electrical energy the heat pump is using (kW)
           readOnly: true
-          example: 1.25
+          examples:
+            - 1.25
+        dischargeRate:
+          type: number
+          format: double
+          description: |
+            Deprecated - use `consumption` instead.  
+            Current discharge rate, in kW
+          readOnly: true
         consumption:
           type: number
           description: The thermal energy going into the home, converted to its electrical equivalent (kW)
           readOnly: true
-          example: 0.0
+          examples:
+            - 0.0
         charge:
           type: number
           description: The amount of thermal energy stored in the unit, converted to its electrical equivalent (kWh)
           readOnly: true
-          example: 1.5
+          examples:
+            - 1.5
         outdoorTemp:
           type: number
           description: The outdoor ambient temperature (ºC)
           readOnly: true
-          example: 16.5
+          examples:
+            - 16.5
     ResearchState:
       allOf:
         - $ref: "#/components/schemas/State"
@@ -622,44 +661,51 @@ components:
               type: number
               description: The ambient indoor temperature as recorded by the unit (ºC)
               readOnly: true
-              example: 21.5
+              examples:
+                - 21.5
             indoorOutTemp:
               type: number
               description: The temperature of the air exiting the unit (ºC)
               readOnly: true
-              example: 30.0
+              examples:
+                - 30.0
             indoorFanSpeed:
               type: integer
               description: Percentage of how fast the indoor fan is running (%)
               minimum: 0
               maximum: 100
               readOnly: true
-              example: 75
+              examples:
+                - 75
             outdoorFanSpeed:
               type: integer
               description: Percentage of how fast the outdoor heat pump fan is running (%)
               minimum: 0
               maximum: 100
               readOnly: true
-              example: 0
+              examples:
+                - 0
             compressorSpeed:
               type: integer
               description: Percentage of how fast the compressor is running (%)
               minimum: 0
               maximum: 100
               readOnly: true
-              example: 0
+              examples:
+                - 0
             defrost:
               type: integer
               description: Whether or not the heat pump is defrosting (0 - no, 1 - yes)
               minimum: 0
               maximum: 1
-              example: 0
+              examples:
+                - 0
             setpoint:
               type: number
               description: The user-set setpoint (ºC)
               readOnly: true
-              example: 23.5
+              examples:
+                - 23.5
     StorageModeEnum:
       type: string
       description: |
@@ -671,7 +717,8 @@ components:
         - charge
         - discharge
         - maintain
-      example: charge
+      examples:
+        - charge
     RealtimeStorageSchedule:
       type: object
       description: A unit's schedule, consisting of a list of StorageEvents. Times are in epoch seconds
@@ -732,11 +779,13 @@ components:
         start:
           type: integer
           description: When the event should begin (epoch seconds timestamp)
-          example: 1577836800
+          examples:
+            - 1577836800
         end:
           type: integer
           description: When the event should end (epoch seconds timestamp)
-          example: 1577851200
+          examples:
+            - 1577851200
         storageMode:
           $ref: "#/components/schemas/StorageModeEnum"
       required:
@@ -754,7 +803,8 @@ components:
           minimum: 0
           maximum: 86339
           description: "When to set storage mode (In seconds after midnight)"
-          example: 25200
+          examples:
+            - 25200
         days:
           type: array
           items:
@@ -762,7 +812,8 @@ components:
           description: |
             An array of size 7 representing the weekdays on which this change should take place.  
             **NOTE: `days` array starts at Sunday, i.e. `days[0]` = Sunday**
-          example: [false, true, true, true, true, true, false]
+          examples:
+            - [false, true, true, true, true, true, false]
       required:
         - storageMode
         - time
@@ -774,13 +825,15 @@ components:
         total:
           type: integer
           description: Total number of results in the response
-          example: 50
+          examples:
+            - 50
         limit:
           type: integer
           minimum: 1
           maximum: 1000
           description: The limit of results per request
-          example: 50
+          examples:
+            - 50
         next:
           type: string
           format: uri
@@ -792,14 +845,16 @@ components:
       $ref: "#/components/schemas/Error"
     Unauthorized:
       type: string
-      example: You do not have permission to view this directory or page.
+      examples:
+        - You do not have permission to view this directory or page.
     Forbidden:
       $ref: "#/components/schemas/Error"
     NotFound:
       $ref: "#/components/schemas/Error"
     InternalError:
       type: string
-      example: The page cannot be displayed because an internal server error has occurred.
+      examples:
+        - The page cannot be displayed because an internal server error has occurred.
     ServiceUnavailable:
       $ref: "#/components/schemas/Error"
     UnprocessableEntity:
@@ -811,11 +866,13 @@ components:
         status:
           type: integer
           description: HTTP status code
-          example: 404
+          examples:
+            - 404
         code:
           type: integer
           description: A more descriptive internal code
-          eample: 40401
+          examples:
+            - 40401
         message:
           type: string
           description: A message describing the error
@@ -897,14 +954,6 @@ components:
         type: integer
         format: int32
         default: 50
-    Offset:
-      name: offset
-      in: query
-      description: Integer specifying the numbered result at which to start
-      schema:
-        type: integer
-        format: int64
-        default: 0
     Page:
       name: page
       in: query
@@ -1035,7 +1084,7 @@ components:
             days: [false, true, true, true, true, true, false]
     RealtimeStorageScheduleResponse:
       value:
-        href: https://api.stash.energy/v2-beta/utilities/12abcde3-fgh4-5ij6-k7l8-9012345mn678/units/12abcde3-fgh4-5ij6-k7l8-9012345mn678/realtime-schedule
+        href: https://api.stash.energy/utilities/12abcde3-fgh4-5ij6-k7l8-9012345mn678/units/12abcde3-fgh4-5ij6-k7l8-9012345mn678/realtime-schedule
         schedule:
           - start: 1577836800
             end: 1577851200
@@ -1048,7 +1097,7 @@ components:
             storageMode: "discharge"
     WeeklyScheduleResponse:
       value:
-        href: https://api.stash.energy/v2-beta/utilities/12abcde3-fgh4-5ij6-k7l8-9012345mn678/units/12abcde3-fgh4-5ij6-k7l8-9012345mn678/weekly-schedule
+        href: https://api.stash.energy/utilities/12abcde3-fgh4-5ij6-k7l8-9012345mn678/units/12abcde3-fgh4-5ij6-k7l8-9012345mn678/weekly-schedule
         utcOffset: 0
         schedule:
           - time: 0
@@ -1065,11 +1114,6 @@ components:
         status: 400
         code: 40001
         message: "Could not parse body of request"
-    Forbidden:
-      value:
-        status: 403
-        code: 40301
-        message: You do not have permission to view this resource.
     NotFound:
       value:
         status: 404
