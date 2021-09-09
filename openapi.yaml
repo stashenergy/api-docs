@@ -633,6 +633,7 @@ components:
             Deprecated - use `consumption` instead.  
             Current discharge rate, in kW
           readOnly: true
+          deprecated: true
         consumption:
           type: number
           description: The thermal energy going into the home, converted to its electrical equivalent (kW)
