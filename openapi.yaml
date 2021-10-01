@@ -106,6 +106,51 @@ paths:
           $ref: "#/components/responses/NotFound"
         "500":
           $ref: "#/components/responses/InternalError"
+  /utilities/{utilityId}/pairing-codes:
+    parameters:
+      - $ref: "#/components/parameters/Utility"
+    post:
+      tags:
+        - Utilities
+      operationId: createUnitPairingCode
+      summary: Create a unit pairing code
+      description: Creates and returns a pairing code that can be entered into a Stash unit to pair that unit with the utility
+      responses:
+        "200":
+          description: SUCCESS
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PairingCode"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /utilities/{utilityId}/pairing-codes/{pairingCodeId}:
+    parameters:
+      - $ref: "#/components/parameters/Utility"
+      - $ref: "#/components/parameters/PairingCode"
+    get:
+      tags:
+        - Utilities
+      operationId: getUnitPairingCode
+      summary: Get a unit pairing code
+      description: Returns information for an existing pairing code
+      responses:
+        "200":
+          description: SUCCESS
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PairingCode"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
   /utilities/{utilityId}/units:
     parameters:
       - $ref: "#/components/parameters/Utility"
@@ -533,6 +578,45 @@ components:
           description: The maximum electrical demand for the heat pump system (kW)
           examples:
             - 1.5
+    PairingCode: 
+      type: object
+      readOnly: true
+      properties:
+        href:
+          type: string
+          format: uri
+          description: URL to self
+          readOnly: true
+          examples: 
+            - https://api.stash.energy/utilities/12abcde3-fgh4-5ij6-k7l8-9012345mn678/pairing-codes/01234567
+        code:
+          type: string
+          description: The pairing code to be entered into the Stash device
+          examples: 
+            - "01234567"
+        expiresOn:
+          type: integer
+          description: Timestamp in epoch seconds of when this code expires
+          examples:
+            - 1617836800
+        status:
+          type: string
+          enum: 
+            - "success"
+            - "new"
+            - "error"
+            - "unitAlreadyPaired"
+          description: | 
+            The status of the pairing:
+            * `"new"`: The pairing code is new and hasn't been used yet
+            * `"success"`: The pairing was completed successfully
+            * `"error"`: There was an error pairing the device but you can try again with the same code
+            * `"unitAlreadyPaired"`: The unit cannot be paired because it is already paired with another utility
+        unitId:
+          type: string
+          description: The ID of the unit that was paired successfully to the utility. Only populated when the pairing code status is "success".
+          examples: 
+            - ac57ae8227db0eb6977413961b6168a02dd59b59f2d78215908a1a04adc95fde0762fe1a107a795b2842fc91e43d7b50a4827765f757eae1a9a72232368b9788
     UnitWithState:
       allOf:
         - $ref: "#/components/schemas/Unit"
@@ -711,9 +795,9 @@ components:
       type: string
       description: |
         Describes the storage mode of the unit. The allowed values are:
-        * "charge": The unit is charging
-        * "discharge": The unit is discharging
-        * "maintain": The unit is maintaining its charge
+        * `"charge"`: The unit is charging
+        * `"discharge"`: The unit is discharging
+        * `"maintain"`: The unit is maintaining its charge
       enum:
         - charge
         - discharge
@@ -767,9 +851,9 @@ components:
       type: string
       description: |
         Describes the schedule mode of the unit. The allowed values are:
-        * "off": The unit is not using a schedule and the storage mode will be set to "maintain"
-        * "weekly": The unit is using its weekly schedule to determine its storage mode
-        * "realtime": The unit is using the provided real-time schedule to determine its storage mode
+        * `"off"`: The unit is not using a schedule and the storage mode will be set to "maintain"
+        * `"weekly"`: The unit is using its weekly schedule to determine its storage mode
+        * `"realtime"`: The unit is using the provided real-time schedule to determine its storage mode
       enum:
         - off
         - weekly
@@ -1037,6 +1121,14 @@ components:
         maximum: 86399
         default: 0
       example: 25200
+    PairingCode:
+      name: pairingCodeId
+      in: path
+      description: An existing pairing code
+      required: true
+      schema: 
+        type: string
+      example: "01234567"
   requestBodies:
     RealtimeStorageScheduleUpdate:
       description: A storage mode schedule
