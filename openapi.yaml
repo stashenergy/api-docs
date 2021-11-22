@@ -46,10 +46,10 @@ info:
 
     ## Security best practices
 
-      * ALWAYS keep your password and access tokens in a secure location.
-      * DO NOT share your password or access tokens.
-      * NEVER check your password or access tokens into version control (ex. git).
-      * It is RECOMMENDED to change your password at least every 6 months.
+    * ALWAYS keep your password and access tokens in a secure location.
+    * DO NOT share your password or access tokens.
+    * NEVER check your password or access tokens into version control (ex. git).
+    * It is RECOMMENDED to change your password at least every 6 months.
 
     We reserve the right to revoke access to any user who abuses the API.
 
