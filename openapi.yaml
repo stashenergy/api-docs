@@ -43,6 +43,16 @@ info:
     4. Use this token to authenticate your API requests. (Include it in the Authorization header)
 
     **NOTE: The access token will be valid for 4 hours**
+
+    ## Security best practices
+
+      * ALWAYS keep your password and access tokens in a secure location.
+      * DO NOT share your password or access tokens.
+      * NEVER check your password or access tokens into version control (ex. git).
+      * It is RECOMMENDED to change your password at least every 6 months.
+
+    We reserve the right to revoke access to any user who abuses the API.
+
 servers:
   - url: https://api.stash.energy
     description: Production Server
@@ -578,7 +588,7 @@ components:
           description: The maximum electrical demand for the heat pump system (kW)
           examples:
             - 1.5
-    PairingCode: 
+    PairingCode:
       type: object
       readOnly: true
       properties:
@@ -587,12 +597,12 @@ components:
           format: uri
           description: URL to self
           readOnly: true
-          examples: 
+          examples:
             - https://api.stash.energy/utilities/12abcde3-fgh4-5ij6-k7l8-9012345mn678/pairing-codes/01234567
         code:
           type: string
           description: The pairing code to be entered into the Stash device
-          examples: 
+          examples:
             - "01234567"
         expiresOn:
           type: integer
@@ -601,12 +611,12 @@ components:
             - 1617836800
         status:
           type: string
-          enum: 
+          enum:
             - "success"
             - "new"
             - "error"
             - "unitAlreadyPaired"
-          description: | 
+          description: |
             The status of the pairing:
             * `"new"`: The pairing code is new and hasn't been used yet
             * `"success"`: The pairing was completed successfully
@@ -614,8 +624,8 @@ components:
             * `"unitAlreadyPaired"`: The unit cannot be paired because it is already paired with another utility
         unitId:
           type: string
-          description: The ID of the unit that was paired successfully to the utility. Only populated when the pairing code status is "success".
-          examples: 
+          description: The ID of the unit that was paired successfully to the utility. Only populated when the pairing code `status` is `"success"``.
+          examples:
             - ac57ae8227db0eb6977413961b6168a02dd59b59f2d78215908a1a04adc95fde0762fe1a107a795b2842fc91e43d7b50a4827765f757eae1a9a72232368b9788
     UnitWithState:
       allOf:
@@ -1126,7 +1136,7 @@ components:
       in: path
       description: An existing pairing code
       required: true
-      schema: 
+      schema:
         type: string
       example: "01234567"
   requestBodies:
