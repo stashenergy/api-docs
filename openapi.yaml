@@ -1224,7 +1224,7 @@ components:
       required: true
       schema:
         type: string
-      example: ac57ae8227db0eb6977413961b6168a02dd59b59f2d78215908a1a04adc95fde0762fe1a107a795b2842fc91e43d7b50a4827765f757eae1a9a72232368b9788
+      example: f2cdd3f373848c071a2d38e4684e0c7cfb3b8d8bd33d46e5106332de7ea2d16fe49f82415deeee0527436e9786f83447e7dc861f5f3179bd55c4168b320913bb
     State:
       name: stateId
       in: path
@@ -1404,7 +1404,7 @@ components:
             days: [false, true, true, true, true, true, false]
     RealtimeStorageScheduleResponseExample:
       value:
-        href: https://api.stash.energy/utilities/12abcde3-fgh4-5ij6-k7l8-9012345mn678/units/12abcde3-fgh4-5ij6-k7l8-9012345mn678/realtime-schedule
+        href: https://api.stash.energy/utilities/12abcde3-fgh4-5ij6-k7l8-9012345mn678/units/f2cdd3f373848c071a2d38e4684e0c7cfb3b8d8bd33d46e5106332de7ea2d16fe49f82415deeee0527436e9786f83447e7dc861f5f3179bd55c4168b320913bb/realtime-schedule
         hasBeenDelivered: true
         schedule:
           - start: 1577836800
@@ -1418,7 +1418,7 @@ components:
             storageMode: "discharge"
     WeeklyStorageScheduleResponseExample:
       value:
-        href: https://api.stash.energy/utilities/12abcde3-fgh4-5ij6-k7l8-9012345mn678/units/12abcde3-fgh4-5ij6-k7l8-9012345mn678/weekly-schedule
+        href: https://api.stash.energy/utilities/12abcde3-fgh4-5ij6-k7l8-9012345mn678/units/f2cdd3f373848c071a2d38e4684e0c7cfb3b8d8bd33d46e5106332de7ea2d16fe49f82415deeee0527436e9786f83447e7dc861f5f3179bd55c4168b320913bb/weekly-schedule
         utcOffset: 0
         hasBeenDelivered: true
         schedule:
