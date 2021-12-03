@@ -695,7 +695,7 @@ components:
             - "01234567"
         expiresOn:
           type: integer
-          description: Timestamp in epoch seconds of when this code expires
+          description: Unix timestamp of when this code expires
           examples:
             - 1617836800
         status:
@@ -728,12 +728,12 @@ components:
             - https://api.stash.energy/utilities/12abcde3-fgh4-5ij6-k7l8-9012345mn678/units/ac57ae8227db0eb6977413961b6168a02dd59b59f2d78215908a1a04adc95fde0762fe1a107a795b2842fc91e43d7b50a4827765f757eae1a9a72232368b9788/past-states
         start:
           type: integer
-          description: Start timestamp in epoch seconds that was provided in the request query parameters
+          description: Start Unix timestamp that was provided in the request query parameters
           examples:
             - 1577836800
         end:
           type: integer
-          description: End timestamp in epoch seconds that was provided in the request query parameters. If it was not provided, it is the timestamp of when the request was received
+          description: End Unix timestamp that was provided in the request query parameters. If it was not provided, it is the timestamp of when the request was received
           examples:
             - 1577851200
         pagination:
@@ -763,7 +763,7 @@ components:
             - "12abcde3-fgh4-5ij6-k7l8-9012345mn678"
         timestamp:
           type: integer
-          description: Timestamp in epoch seconds of when this state was recorded
+          description: Unix timestamp of when this state was recorded
           examples:
             - 1577836801
         scheduleMode:
@@ -895,7 +895,7 @@ components:
         - charge
     RealtimeStorageScheduleResponse:
       type: object
-      description: A unit's schedule, consisting of a list of StorageEvents. Times are in epoch seconds
+      description: A unit's schedule, consisting of a list of StorageEvents. Times are Unix timestamps
       properties:
         href:
           type: string
@@ -997,12 +997,12 @@ components:
       properties:
         start:
           type: integer
-          description: When the event should begin (epoch seconds timestamp)
+          description: When the event should begin (Unix timestamp)
           examples:
             - 1577836800
         end:
           type: integer
-          description: When the event should end (epoch seconds timestamp)
+          description: When the event should end (Unix timestamp)
           examples:
             - 1577851200
         storageMode:
@@ -1251,7 +1251,7 @@ components:
     StartTimestamp:
       name: start
       in: query
-      description: Timestamp in epoch seconds specifying the oldest time for which to pull results
+      description: Unix timestamp specifying the oldest time for which to pull results
       required: true
       schema:
         type: integer
@@ -1261,7 +1261,7 @@ components:
       name: end
       in: query
       description: |
-        Timestamp in epoch seconds specifying the most recent time for which to pull results.  
+        Unix timestamp specifying the most recent time for which to pull results.  
         If not provided, defaults to current time.
       schema:
         type: integer
