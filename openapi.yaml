@@ -422,11 +422,12 @@ paths:
     parameters:
       - $ref: "#/components/parameters/Utility"
       - $ref: "#/components/parameters/Unit"
-      - $ref: "#/components/parameters/UtcOffset"
     get:
       tags:
         - Unit Storage
       operationId: getWeeklyScheduleForUtilityUnit
+      parameters:
+        - $ref: "#/components/parameters/UtcOffset_wsget"
       summary: Get a weekly storage schedule
       description: |
         This schedule is executed when there are no future storage mode changes in the realtime schedule.  
@@ -451,6 +452,8 @@ paths:
       tags:
         - Unit Storage
       operationId: setWeeklyScheduleForUtilityUnit
+      parameters:
+        - $ref: "#/components/parameters/UtcOffset_wsput"
       summary: Set a unit's weekly storage schedule
       description: |
         Provide a weekly storage schedule for a unit.  
@@ -1267,55 +1270,21 @@ components:
         type: integer
         format: int64
       example: 1577851200
-    UtcOffset:
+    UtcOffset_wsput:
       name: utcOffset
       in: query
-      description: |
-        ### When PUTing a Weekly Schedule
-        A number representing how much the provided schedule is offset from UTC (in seconds).
-
-        This is for convenience sake, so you don't have to adjust your schedule to UTC before submitting
-        the schedule if you don't want to. It's a small pain to do, so if you don't do it, we will do it for you. (We store schedules in UTC.)  
-
-        For example, Saturdays and Sundays at 00:00 UTC-4:00 (Atlantic Standard Time) is Fridays and Saturdays at 20:00 UTC. You have the option
-        of sending that schedule in your preferred time zone with url
-
-        `.../weekly-schedule?utcOffset=-14400`
-
-        and body as
-
-        ```json
-        { 
-          "schedule": [ 
-            {
-              "time": 0, 
-              "days": [true, false, false, false, false, false, true],
-              "storageMode": "charge"
-            } 
-          ] 
-        }
-        ```
-
-        or in UTC time with url
-
-        `.../weekly-schedule?utcOffset=0` or `.../weekly-schedule`
-
-        and body as
-
-        ```json
-        { 
-          "schedule": [ 
-            { 
-              "time": 72000, 
-              "days": [false, false, false, false, false, true, true],
-              "storageMode": "charge" 
-            } 
-          ] 
-        }
-        ```
-
-        ### When GETting a Weekly Schedule
-        A number denoting how much the returned schedule will be offset from UTC time (in seconds).
+      description: The time zone of the provided schedule, as an offset from UTC in seconds. For example, if the schedule is in Atlantic Standard Time (AST/UTC-0400), you would provide `utcOffset=-14400`. If not provided, we assume the provided schedule is in UTC time (offset of `0`).
+      schema:
+        type: integer
+        format: int32
+        minimum: -86399
+        maximum: 86399
+        default: 0
+      example: 25200
+    UtcOffset_wsget:
+      name: utcOffset
+      in: query
+      description: The time zone in which the schedule should be returned, as an offset from UTC in seconds. For example, if you provide `utcOffset=-14400`, the returned schedule will be in AST/UTC-0400. If not provided, the schedule will be returned in UTC time (offset of `0`).
       schema:
         type: integer
         format: int32
