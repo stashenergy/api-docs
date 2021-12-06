@@ -182,6 +182,15 @@ paths:
             minimum: -86399
             maximum: 86399
             default: 0
+        - name: tags
+          in: query
+          description: Filter units by tag. Only units with these tags will be returned. Currently only accepts 1 tag.
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
       summary: Get a utility's storage units
       description: Returns a collection of Unit resources controlled by the given Utility.
       responses:
@@ -624,6 +633,14 @@ components:
           description: Unit's ID
           examples:
             - ac57ae8227db0eb6977413961b6168a02dd59b59f2d78215908a1a04adc95fde0762fe1a107a795b2842fc91e43d7b50a4827765f757eae1a9a72232368b9788
+        tags:
+          type: array
+          readOnly: true
+          items:
+            type: string
+          description: Array of tags assigned to this unit.
+          examples:
+            - ["tag1"]
         type:
           type: string
           readOnly: true
@@ -1124,7 +1141,7 @@ components:
           type: array
           items:
             type: string
-          description: The tags to assign to the unit
+          description: The tags to assign to the unit. Currently only accepts 1 tag. Tags must only contain letters, numbers, and underscores.
         weeklySchedule:
           $ref: "#/components/schemas/WeeklyScheduleUpdate"
         realtimeSchedule:
@@ -1176,7 +1193,7 @@ components:
           type: array
           items:
             type: string
-          description: The tags to assign to the unit
+          description: The tags to assign to the unit. Currently only accepts 1 tag. Tags must only contain letters, numbers, and underscores.
         weeklySchedule:
           $ref: "#/components/schemas/WeeklyScheduleUpdate"
         realtimeSchedule:
