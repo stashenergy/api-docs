@@ -208,27 +208,41 @@ paths:
           $ref: "#/components/responses/NotFound"
         "500":
           $ref: "#/components/responses/InternalError"
-  /utilities/{utilityId}/units/update-many:
+  /utilities/{utilityId}/units/update:
     parameters:
       - $ref: "#/components/parameters/Utility"
     patch:
       tags:
         - Units
-      summary: Update many units
-      description: Supports bulk updates (using tags query parameter and `unit` property), or batch updates (using `units` property). You cannot specify both `unit` and `units` property in the same request.
-      operationId: units_patch
-      parameters:
-        - name: tags
-          in: query
-          description: In a bulk update, units with these tags will be updated. Currently only accepts 1 tag.
-          style: form
-          explode: false
-          schema:
-            type: array
-            items:
-              type: string
+      summary: Update units by id
+      description: Update units by providing an array of individual unit updates
+      operationId: units_update
       requestBody:
-        $ref: "#/components/requestBodies/UnitsPatchRequestBody"
+        $ref: "#/components/requestBodies/UpdateUnitsRequestBody"
+      responses:
+        "204":
+          description: SUCCESS
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+  /utilities/{utilityId}/units/update-by-tags:
+    parameters:
+      - $ref: "#/components/parameters/Utility"
+    patch:
+      tags:
+        - Units
+      summary: Update units by tag
+      description: Send an update to a group of units.
+      operationId: units_updateByTags
+      requestBody:
+        $ref: "#/components/requestBodies/UpdateUnitsByTagsRequestBody"
       responses:
         "204":
           description: SUCCESS
@@ -278,37 +292,6 @@ paths:
           $ref: "#/components/responses/NotFound"
         "500":
           $ref: "#/components/responses/InternalError"
-    patch:
-      tags:
-        - Units
-      operationId: unit_patch
-      summary: Update a unit
-      description: Update a unit's tags or storage schedules
-      parameters:
-        - name: weeklyScheduleUtcOffset
-          in: query
-          description: A number denoting how much the weekly storage schedule (`weeklySchedule` property) is offset from UTC time (in seconds). Defaults to `0`.
-          schema:
-            type: integer
-            format: int32
-            minimum: -86399
-            maximum: 86399
-            default: 0
-      requestBody:
-        $ref: "#/components/requestBodies/UnitPatchRequestBody"
-      responses:
-        "204":
-          description: SUCCESS
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "400":
-          $ref: "#/components/responses/BadRequest"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "404":
-          $ref: "#/components/responses/NotFound"
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
   /utilities/{utilityId}/units/{unitId}/past-states:
     parameters:
       - $ref: "#/components/parameters/Utility"
@@ -583,9 +566,9 @@ components:
         id:
           type: string
           readOnly: true
-          description: Utility ID (GUID)
+          description: Utility ID
           examples:
-            - 12abcde3-fgh4-5ij6-k7l8-9012345mn678
+            - 1-12abcde3-fgh4-5ij6-k7l8-9012345mn678
         name:
           type: string
           description: Utility's name
@@ -1134,18 +1117,6 @@ components:
         message:
           type: string
           description: A message describing the issue with the property
-    UnitUpdate:
-      type: object
-      properties:
-        tags:
-          type: array
-          items:
-            type: string
-          description: The tags to assign to the unit. Currently only accepts 1 tag. Tags must only contain letters, numbers, and underscores.
-        weeklySchedule:
-          $ref: "#/components/schemas/WeeklyScheduleUpdate"
-        realtimeSchedule:
-          $ref: "#/components/schemas/RealtimeScheduleUpdate"
     WeeklyScheduleUpdate:
       type: object
       description: The weekly schedule to assign to the unit
@@ -1156,12 +1127,13 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/WeeklyStorageModeChange"
+          description: The list of weekly storage mode changes that make up the weekly schedule
         utcOffset:
           type: integer
-          description: The offset from UTC (in seconds) of the events.
+          description: The offset from UTC (in seconds) of the provided events.
           default: 0
           minimum: -86399
-          maximum: 96399
+          maximum: 86399
     RealtimeScheduleUpdate:
       type: object
       description: The realtime schedule to assign to the unit
@@ -1175,7 +1147,7 @@ components:
           description: The list of realtime events that make up the realtime schedule
     BulkUnitUpdate:
       type: object
-      description: "[If populated, signifies this is a bulk update] A unit update that will be applied to all units that match the given tags. The `tags` query parameter must be specified in the request URL."
+      description: A unit update that will be applied to all units that match the given tags.
       properties:
         weeklySchedule:
           $ref: "#/components/schemas/WeeklyScheduleUpdate"
@@ -1193,7 +1165,7 @@ components:
           type: array
           items:
             type: string
-          description: The tags to assign to the unit. Currently only accepts 1 tag. Tags must only contain letters, numbers, and underscores.
+          description: Tags to assign to the unit. Currently only accepts 1 tag. Tags are to group units. They must only contain letters, numbers, and underscores.
         weeklySchedule:
           $ref: "#/components/schemas/WeeklyScheduleUpdate"
         realtimeSchedule:
@@ -1207,8 +1179,8 @@ components:
       description: |
         A comma separated list of properties you wish to expand in the response (that are not provided by default). Current accepted properties:
         - `unit.state`: Include the unit's current state
-        - `unit.weeklySchedule`: Include the unit's weekly storage schedule (under the `weeklySchedule` property)
-        - `unit.realtimeSchedule`: Include the unit's realtime storage schedule (under the `realtimeSchedule` property)
+        - `unit.weeklySchedule`: Include the unit's weekly storage schedule in the `weeklySchedule` property
+        - `unit.realtimeSchedule`: Include the unit's realtime storage schedule in the `realtimeSchedule` property
       schema:
         type: array
         items:
@@ -1232,11 +1204,11 @@ components:
     Utility:
       name: utilityId
       in: path
-      description: A utility ID (GUID)
+      description: A utility ID
       required: true
       schema:
         type: string
-      example: "12abcde3-fgh4-5ij6-k7l8-9012345mn678"
+      example: "1-12abcde3-fgh4-5ij6-k7l8-9012345mn678"
     Unit:
       name: unitId
       in: path
@@ -1338,31 +1310,30 @@ components:
           examples:
             weeklyScheduleUpdateExample:
               $ref: "#/components/examples/WeeklyStorageScheduleRequestBodyExample"
-    UnitsPatchRequestBody:
-      description: A json object containing a weekly or realtime storage schedule. Should contain the `unit` or `units` property (but not both).
+    UpdateUnitsByTagsRequestBody:
       content:
         application/json:
           schema:
             type: object
             properties:
-              unit:
+              tags:
+                type: array
+                items:
+                  type: string
+                description: Tags to match. Currently only accepts 1 tag.
+              update:
                 $ref: "#/components/schemas/BulkUnitUpdate"
+    UpdateUnitsRequestBody:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
               units:
                 type: array
-                description: "[If populated, signifies this is a batch update] A list of updates to apply to individual units."
+                description: A list of unit updates
                 items:
                   $ref: "#/components/schemas/BatchUnitUpdate"
-    UnitPatchRequestBody:
-      description: A json object containing unit properties to update
-      content:
-        application/json:
-          schema:
-            type: object
-            required:
-              - unit
-            properties:
-              unit:
-                $ref: "#/components/schemas/UnitUpdate"
   examples:
     RealtimeStorageScheduleRequestBodyExample:
       value:
