@@ -164,19 +164,35 @@ paths:
   /utilities/{utilityId}/units:
     parameters:
       - $ref: "#/components/parameters/Utility"
-      - $ref: "#/components/parameters/Limit"
-      - $ref: "#/components/parameters/Page"
-      - $ref: "#/components/parameters/Expand"
-      - $ref: "#/components/parameters/Research"
     get:
       tags:
         - Units
       operationId: getUnitsForUtility
+      parameters:
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Expand"
+        - $ref: "#/components/parameters/Research"
+        - name: weeklyScheduleUtcOffset
+          in: query
+          description: A number denoting how much the weekly storage schedule will be offset from UTC time (in seconds).
+          schema:
+            type: integer
+            format: int32
+            minimum: -86399
+            maximum: 86399
+            default: 0
+        - name: tags
+          in: query
+          description: Filter units by tag. Only units with these tags will be returned. Currently only accepts 1 tag.
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
       summary: Get a utility's storage units
-      description: |
-        Returns a collection of Unit resources controlled by the given Utility.  
-        Valid options for the `expand` query parameter include:  
-          * `unit.state`: The unit's current state will be included in the response
+      description: Returns a collection of Unit resources controlled by the given Utility.
       responses:
         "200":
           description: SUCCESS
@@ -192,26 +208,84 @@ paths:
           $ref: "#/components/responses/NotFound"
         "500":
           $ref: "#/components/responses/InternalError"
+  /utilities/{utilityId}/units/update:
+    parameters:
+      - $ref: "#/components/parameters/Utility"
+    patch:
+      tags:
+        - Units
+      summary: Update units by id
+      description: Update units by providing an array of individual unit updates
+      operationId: units_update
+      requestBody:
+        $ref: "#/components/requestBodies/UpdateUnitsRequestBody"
+      responses:
+        "204":
+          description: SUCCESS
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+  /utilities/{utilityId}/units/update-by-tags:
+    parameters:
+      - $ref: "#/components/parameters/Utility"
+    patch:
+      tags:
+        - Units
+      summary: Update units by tag
+      description: Send an update to a group of units.
+      operationId: units_updateByTags
+      requestBody:
+        $ref: "#/components/requestBodies/UpdateUnitsByTagsRequestBody"
+      responses:
+        "204":
+          description: SUCCESS
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
   /utilities/{utilityId}/units/{unitId}:
     parameters:
       - $ref: "#/components/parameters/Utility"
       - $ref: "#/components/parameters/Unit"
-      - $ref: "#/components/parameters/Research"
     get:
+      parameters:
+        - $ref: "#/components/parameters/Research"
+        - name: weeklyScheduleUtcOffset
+          in: query
+          description: A number denoting how much the weekly storage schedule will be offset from UTC time (in seconds).
+          schema:
+            type: integer
+            format: int32
+            minimum: -86399
+            maximum: 86399
+            default: 0
       tags:
         - Units
       operationId: getUnitByIdForUtility
       summary: Get a storage unit
-      description: >
-        Returns a Unit resource corresponding to the given id, provided it is controlled
-        by the given utility.
+      description: |
+        Returns a Unit resource corresponding to the given id, provided it is controlled by the given utility.  
+        **NOTE: all unit properties are expanded by default.**
       responses:
         "200":
           description: SUCCESS
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UnitWithState"
+                $ref: "#/components/schemas/UnitResponse"
         "401":
           $ref: "#/components/responses/Unauthorized"
         "404":
@@ -296,10 +370,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/RealtimeStorageSchedule"
+                $ref: "#/components/schemas/RealtimeStorageScheduleResponse"
               examples:
                 one:
-                  $ref: "#/components/examples/RealtimeStorageScheduleResponse"
+                  $ref: "#/components/examples/RealtimeStorageScheduleResponseExample"
         "401":
           $ref: "#/components/responses/Unauthorized"
         "404":
@@ -313,20 +387,19 @@ paths:
       summary: Set a unit's realtime storage schedule
       description: |
         Provide a realtime storage schedule for a unit.  
-        A successful request means the schedule has been delivered to the unit.  
-        A 503 error is returned if the update cannot be delivered to the unit.
+        A successful request means the schedule will be guaranteed to be delivered to the unit within 5 minutes. You can check whether the schedule has been delivered by querying the schedule's `hasBeenDelivered` property.
       requestBody:
-        $ref: "#/components/requestBodies/RealtimeStorageScheduleUpdate"
+        $ref: "#/components/requestBodies/RealtimeStorageScheduleRequestBody"
       responses:
         "200":
           description: SUCCESS
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/RealtimeStorageSchedule"
+                $ref: "#/components/schemas/RealtimeStorageScheduleResponse"
               examples:
                 one:
-                  $ref: "#/components/examples/RealtimeStorageScheduleResponse"
+                  $ref: "#/components/examples/RealtimeStorageScheduleResponseExample"
         "400":
           $ref: "#/components/responses/BadRequest"
         "401":
@@ -337,17 +410,16 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         "500":
           $ref: "#/components/responses/InternalError"
-        "503":
-          $ref: "#/components/responses/ServiceUnavailable"
   /utilities/{utilityId}/units/{unitId}/weekly-schedule:
     parameters:
       - $ref: "#/components/parameters/Utility"
       - $ref: "#/components/parameters/Unit"
-      - $ref: "#/components/parameters/UtcOffset"
     get:
       tags:
         - Unit Storage
       operationId: getWeeklyScheduleForUtilityUnit
+      parameters:
+        - $ref: "#/components/parameters/UtcOffset_wsget"
       summary: Get a weekly storage schedule
       description: |
         This schedule is executed when there are no future storage mode changes in the realtime schedule.  
@@ -361,7 +433,7 @@ paths:
                 $ref: "#/components/schemas/WeeklySchedule"
               examples:
                 one:
-                  $ref: "#/components/examples/WeeklyScheduleResponse"
+                  $ref: "#/components/examples/WeeklyStorageScheduleResponseExample"
         "401":
           $ref: "#/components/responses/Unauthorized"
         "404":
@@ -372,13 +444,14 @@ paths:
       tags:
         - Unit Storage
       operationId: setWeeklyScheduleForUtilityUnit
+      parameters:
+        - $ref: "#/components/parameters/UtcOffset_wsput"
       summary: Set a unit's weekly storage schedule
       description: |
         Provide a weekly storage schedule for a unit.  
-        A successful request means the schedule has been delivered to the unit.  
-        A 503 error is returned if the update cannot be delivered to the unit.
+        A successful request means the schedule will be guaranteed to be delivered to the unit within 5 minutes. You can check whether the schedule has been delivered by querying the schedule's `hasBeenDelivered` property.
       requestBody:
-        $ref: "#/components/requestBodies/WeeklyStorageScheduleUpdate"
+        $ref: "#/components/requestBodies/WeeklyStorageScheduleRequestBody"
       responses:
         "200":
           description: SUCCESS
@@ -388,7 +461,7 @@ paths:
                 $ref: "#/components/schemas/WeeklySchedule"
               examples:
                 one:
-                  $ref: "#/components/examples/WeeklyScheduleResponse"
+                  $ref: "#/components/examples/WeeklyStorageScheduleResponseExample"
         "400":
           $ref: "#/components/responses/BadRequest"
         "401":
@@ -399,8 +472,6 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         "500":
           $ref: "#/components/responses/InternalError"
-        "503":
-          $ref: "#/components/responses/ServiceUnavailable"
 components:
   responses:
     BadRequest: # 400
@@ -411,13 +482,19 @@ components:
             $ref: "#/components/schemas/BadRequest"
           examples:
             one:
-              $ref: "#/components/examples/BadRequest"
+              $ref: "#/components/examples/BadRequestResponseExample"
     Unauthorized: # 401
       description: UNAUTHORIZED
       content:
         text/plain:
           schema:
             $ref: "#/components/schemas/Unauthorized"
+    Forbidden: # 403
+      description: FORBIDDEN
+      content:
+        text/plain:
+          schema:
+            $ref: "#/components/schemas/Forbidden"
     NotFound: # 404
       description: NOT_FOUND
       content:
@@ -426,7 +503,7 @@ components:
             $ref: "#/components/schemas/NotFound"
           examples:
             one:
-              $ref: "#/components/examples/NotFound"
+              $ref: "#/components/examples/NotFoundResponseExample"
     UnprocessableEntity: # 422
       description: UNPROCESSABLE_ENTITY
       content:
@@ -435,22 +512,13 @@ components:
             $ref: "#/components/schemas/UnprocessableEntity"
           examples:
             one:
-              $ref: "#/components/examples/UnprocessableEntity"
+              $ref: "#/components/examples/UnprocessableEntityResponseExample"
     InternalError: # 500
       description: INTERNAL_ERROR
       content:
         text/plain:
           schema:
             $ref: "#/components/schemas/InternalError"
-    ServiceUnavailable: # 503
-      description: SERVICE_UNAVAILABLE
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/ServiceUnavailable"
-          examples:
-            one:
-              $ref: "#/components/examples/DeviceUpdateFailed"
   schemas:
     User:
       type: object
@@ -498,9 +566,9 @@ components:
         id:
           type: string
           readOnly: true
-          description: Utility ID (GUID)
+          description: Utility ID
           examples:
-            - 12abcde3-fgh4-5ij6-k7l8-9012345mn678
+            - 1-12abcde3-fgh4-5ij6-k7l8-9012345mn678
         name:
           type: string
           description: Utility's name
@@ -521,12 +589,19 @@ components:
         units:
           type: array
           items:
-            oneOf:
-              - $ref: "#/components/schemas/UnitWithState"
-              - $ref: "#/components/schemas/Unit"
+            $ref: "#/components/schemas/UnitResponse"
           description: List of units
-    Unit:
+    UnitResponse:
       type: object
+      required:
+        - href
+        - id
+        - tags
+        - type
+        - firmwareVersion
+        - connectionReliability
+        - maxCharge
+        - maxDemand
       properties:
         href:
           type: string
@@ -541,6 +616,14 @@ components:
           description: Unit's ID
           examples:
             - ac57ae8227db0eb6977413961b6168a02dd59b59f2d78215908a1a04adc95fde0762fe1a107a795b2842fc91e43d7b50a4827765f757eae1a9a72232368b9788
+        tags:
+          type: array
+          readOnly: true
+          items:
+            type: string
+          description: Array of tags assigned to this unit.
+          examples:
+            - ["tag1"]
         type:
           type: string
           readOnly: true
@@ -588,6 +671,15 @@ components:
           description: The maximum electrical demand for the heat pump system (kW)
           examples:
             - 1.5
+        state:
+          description: The unit's most recent recorded state
+          oneOf:
+            - $ref: "#/components/schemas/State"
+            - $ref: "#/components/schemas/ResearchState"
+        weeklySchedule:
+          $ref: "#/components/schemas/WeeklyScheduleResponse"
+        realtimeSchedule:
+          $ref: "#/components/schemas/RealtimeScheduleResponse"
     PairingCode:
       type: object
       readOnly: true
@@ -606,7 +698,7 @@ components:
             - "01234567"
         expiresOn:
           type: integer
-          description: Timestamp in epoch seconds of when this code expires
+          description: Unix timestamp of when this code expires
           examples:
             - 1617836800
         status:
@@ -627,16 +719,6 @@ components:
           description: The ID of the unit that was paired successfully to the utility. Only populated when the pairing code `status` is `"success"``.
           examples:
             - ac57ae8227db0eb6977413961b6168a02dd59b59f2d78215908a1a04adc95fde0762fe1a107a795b2842fc91e43d7b50a4827765f757eae1a9a72232368b9788
-    UnitWithState:
-      allOf:
-        - $ref: "#/components/schemas/Unit"
-        - type: object
-          readOnly: true
-          properties:
-            state:
-              oneOf:
-                - $ref: "#/components/schemas/State"
-                - $ref: "#/components/schemas/ResearchState"
     PastStates:
       type: object
       readOnly: true
@@ -649,12 +731,12 @@ components:
             - https://api.stash.energy/utilities/12abcde3-fgh4-5ij6-k7l8-9012345mn678/units/ac57ae8227db0eb6977413961b6168a02dd59b59f2d78215908a1a04adc95fde0762fe1a107a795b2842fc91e43d7b50a4827765f757eae1a9a72232368b9788/past-states
         start:
           type: integer
-          description: Start timestamp in epoch seconds that was provided in the request query parameters
+          description: Start Unix timestamp that was provided in the request query parameters
           examples:
             - 1577836800
         end:
           type: integer
-          description: End timestamp in epoch seconds that was provided in the request query parameters. If it was not provided, it is the timestamp of when the request was received
+          description: End Unix timestamp that was provided in the request query parameters. If it was not provided, it is the timestamp of when the request was received
           examples:
             - 1577851200
         pagination:
@@ -684,7 +766,7 @@ components:
             - "12abcde3-fgh4-5ij6-k7l8-9012345mn678"
         timestamp:
           type: integer
-          description: Timestamp in epoch seconds of when this state was recorded
+          description: Unix timestamp of when this state was recorded
           examples:
             - 1577836801
         scheduleMode:
@@ -814,14 +896,18 @@ components:
         - maintain
       examples:
         - charge
-    RealtimeStorageSchedule:
+    RealtimeStorageScheduleResponse:
       type: object
-      description: A unit's schedule, consisting of a list of StorageEvents. Times are in epoch seconds
+      description: A unit's schedule, consisting of a list of StorageEvents. Times are Unix timestamps
       properties:
         href:
           type: string
           format: uri
           description: Link to self
+          readOnly: true
+        hasBeenDelivered:
+          type: boolean
+          description: If the schedule has been delivered to the unit
           readOnly: true
         schedule:
           type: array
@@ -831,6 +917,22 @@ components:
       required:
         - href
         - schedule
+        - hasBeenDelivered
+    RealtimeScheduleResponse:
+      required:
+        - events
+        - hasBeenDelivered
+      type: object
+      properties:
+        events:
+          type: array
+          items:
+            $ref: "#/components/schemas/StorageEvent"
+          description: The schedule events
+        hasBeenDelivered:
+          type: boolean
+          description: If the schedule has been delivered to the unit
+      description: Realtime storage schedule
     WeeklySchedule:
       type: object
       description: |
@@ -845,9 +947,13 @@ components:
         utcOffset:
           type: integer
           format: int32
-          description: "The UTC offset in seconds as given in the query parameter"
+          description: The UTC offset in seconds as was requested in the query parameter
           minimum: -86399
           maximum: 86399
+          readOnly: true
+        hasBeenDelivered:
+          type: boolean
+          description: If the schedule has been delivered to the unit
           readOnly: true
         schedule:
           type: array
@@ -857,6 +963,27 @@ components:
       required:
         - utcOffset
         - schedule
+        - hasBeenDelivered
+    WeeklyScheduleResponse:
+      required:
+        - hasBeenDelivered
+        - events
+        - utcOffset
+      type: object
+      properties:
+        hasBeenDelivered:
+          type: boolean
+          description: If the schedule has been delivered to the unit
+        events:
+          type: array
+          items:
+            $ref: "#/components/schemas/WeeklyStorageModeChange"
+          description: The schedule events
+        utcOffset:
+          type: integer
+          format: int32
+          description: The UTC offset (in seconds) of the returned schedule
+      description: Weekly storage schedule
     ScheduleModeEnum:
       type: string
       description: |
@@ -873,12 +1000,12 @@ components:
       properties:
         start:
           type: integer
-          description: When the event should begin (epoch seconds timestamp)
+          description: When the event should begin (Unix timestamp)
           examples:
             - 1577836800
         end:
           type: integer
-          description: When the event should end (epoch seconds timestamp)
+          description: When the event should end (Unix timestamp)
           examples:
             - 1577851200
         storageMode:
@@ -990,13 +1117,70 @@ components:
         message:
           type: string
           description: A message describing the issue with the property
+    WeeklyScheduleUpdate:
+      type: object
+      description: The weekly schedule to assign to the unit
+      required:
+        - events
+      properties:
+        events:
+          type: array
+          items:
+            $ref: "#/components/schemas/WeeklyStorageModeChange"
+          description: The list of weekly storage mode changes that make up the weekly schedule
+        utcOffset:
+          type: integer
+          description: The offset from UTC (in seconds) of the provided events.
+          default: 0
+          minimum: -86399
+          maximum: 86399
+    RealtimeScheduleUpdate:
+      type: object
+      description: The realtime schedule to assign to the unit
+      required:
+        - events
+      properties:
+        events:
+          type: array
+          items:
+            $ref: "#/components/schemas/StorageEvent"
+          description: The list of realtime events that make up the realtime schedule
+    BulkUnitUpdate:
+      type: object
+      description: A unit update that will be applied to all units that match the given tags.
+      properties:
+        weeklySchedule:
+          $ref: "#/components/schemas/WeeklyScheduleUpdate"
+        realtimeSchedule:
+          $ref: "#/components/schemas/RealtimeScheduleUpdate"
+    BatchUnitUpdate:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          description: The id of the unit to update
+        tags:
+          type: array
+          items:
+            type: string
+          description: Tags to assign to the unit. Currently only accepts 1 tag. Tags are to group units. They must only contain letters, numbers, and underscores.
+        weeklySchedule:
+          $ref: "#/components/schemas/WeeklyScheduleUpdate"
+        realtimeSchedule:
+          $ref: "#/components/schemas/RealtimeScheduleUpdate"
   parameters:
     Expand:
       name: expand
       in: query
+      style: form
+      explode: false
       description: |
-        A comma separated list of propert(y|ies) you wish to expand in the response (that otherwise would not be provided).  
-        Currently only valid for the `/units` endpoint.
+        A comma separated list of properties you wish to expand in the response (that are not provided by default). Current accepted properties:
+        - `unit.state`: Include the unit's current state
+        - `unit.weeklySchedule`: Include the unit's weekly storage schedule in the `weeklySchedule` property
+        - `unit.realtimeSchedule`: Include the unit's realtime storage schedule in the `realtimeSchedule` property
       schema:
         type: array
         items:
@@ -1020,11 +1204,11 @@ components:
     Utility:
       name: utilityId
       in: path
-      description: A utility ID (GUID)
+      description: A utility ID
       required: true
       schema:
         type: string
-      example: "12abcde3-fgh4-5ij6-k7l8-9012345mn678"
+      example: "1-12abcde3-fgh4-5ij6-k7l8-9012345mn678"
     Unit:
       name: unitId
       in: path
@@ -1032,7 +1216,7 @@ components:
       required: true
       schema:
         type: string
-      example: ac57ae8227db0eb6977413961b6168a02dd59b59f2d78215908a1a04adc95fde0762fe1a107a795b2842fc91e43d7b50a4827765f757eae1a9a72232368b9788
+      example: f2cdd3f373848c071a2d38e4684e0c7cfb3b8d8bd33d46e5106332de7ea2d16fe49f82415deeee0527436e9786f83447e7dc861f5f3179bd55c4168b320913bb
     State:
       name: stateId
       in: path
@@ -1059,7 +1243,7 @@ components:
     StartTimestamp:
       name: start
       in: query
-      description: Timestamp in epoch seconds specifying the oldest time for which to pull results
+      description: Unix timestamp specifying the oldest time for which to pull results
       required: true
       schema:
         type: integer
@@ -1069,61 +1253,27 @@ components:
       name: end
       in: query
       description: |
-        Timestamp in epoch seconds specifying the most recent time for which to pull results.  
+        Unix timestamp specifying the most recent time for which to pull results.  
         If not provided, defaults to current time.
       schema:
         type: integer
         format: int64
       example: 1577851200
-    UtcOffset:
+    UtcOffset_wsput:
       name: utcOffset
       in: query
-      description: |
-        ### When PUTing a Weekly Schedule
-        A number representing how much the provided schedule is offset from UTC (in seconds).
-
-        This is for convenience sake, so you don't have to adjust your schedule to UTC before submitting
-        the schedule if you don't want to. It's a small pain to do, so if you don't do it, we will do it for you. (We store schedules in UTC.)  
-
-        For example, Saturdays and Sundays at 00:00 UTC-4:00 (Atlantic Standard Time) is Fridays and Saturdays at 20:00 UTC. You have the option
-        of sending that schedule in your preferred time zone with url
-
-        `.../weekly-schedule?utcOffset=-14400`
-
-        and body as
-
-        ```json
-        { 
-          "schedule": [ 
-            {
-              "time": 0, 
-              "days": [true, false, false, false, false, false, true],
-              "storageMode": "charge"
-            } 
-          ] 
-        }
-        ```
-
-        or in UTC time with url
-
-        `.../weekly-schedule?utcOffset=0` or `.../weekly-schedule`
-
-        and body as
-
-        ```json
-        { 
-          "schedule": [ 
-            { 
-              "time": 72000, 
-              "days": [false, false, false, false, false, true, true],
-              "storageMode": "charge" 
-            } 
-          ] 
-        }
-        ```
-
-        ### When GETting a Weekly Schedule
-        A number denoting how much the returned schedule will be offset from UTC time (in seconds).
+      description: The time zone of the provided schedule, as an offset from UTC in seconds. For example, if the schedule is in Atlantic Standard Time (AST/UTC-0400), you would provide `utcOffset=-14400`. If not provided, we assume the provided schedule is in UTC time (offset of `0`).
+      schema:
+        type: integer
+        format: int32
+        minimum: -86399
+        maximum: 86399
+        default: 0
+      example: 25200
+    UtcOffset_wsget:
+      name: utcOffset
+      in: query
+      description: The time zone in which the schedule should be returned, as an offset from UTC in seconds. For example, if you provide `utcOffset=-14400`, the returned schedule will be in AST/UTC-0400. If not provided, the schedule will be returned in UTC time (offset of `0`).
       schema:
         type: integer
         format: int32
@@ -1140,17 +1290,17 @@ components:
         type: string
       example: "01234567"
   requestBodies:
-    RealtimeStorageScheduleUpdate:
+    RealtimeStorageScheduleRequestBody:
       description: A storage mode schedule
       required: true
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/RealtimeStorageSchedule"
+            $ref: "#/components/schemas/RealtimeStorageScheduleResponse"
           examples:
             scheduleUpdateExample:
-              $ref: "#/components/examples/RealtimeStorageScheduleRequestBody"
-    WeeklyStorageScheduleUpdate:
+              $ref: "#/components/examples/RealtimeStorageScheduleRequestBodyExample"
+    WeeklyStorageScheduleRequestBody:
       description: A weekly storage mode schedule
       required: true
       content:
@@ -1159,9 +1309,33 @@ components:
             $ref: "#/components/schemas/WeeklySchedule"
           examples:
             weeklyScheduleUpdateExample:
-              $ref: "#/components/examples/WeeklyScheduleRequestBody"
+              $ref: "#/components/examples/WeeklyStorageScheduleRequestBodyExample"
+    UpdateUnitsByTagsRequestBody:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              tags:
+                type: array
+                items:
+                  type: string
+                description: Tags to match. Currently only accepts 1 tag.
+              update:
+                $ref: "#/components/schemas/BulkUnitUpdate"
+    UpdateUnitsRequestBody:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              units:
+                type: array
+                description: A list of unit updates
+                items:
+                  $ref: "#/components/schemas/BatchUnitUpdate"
   examples:
-    RealtimeStorageScheduleRequestBody:
+    RealtimeStorageScheduleRequestBodyExample:
       value:
         schedule:
           - start: 1577836800
@@ -1173,7 +1347,7 @@ components:
           - start: 1577865600
             end: 1577880000
             storageMode: "discharge"
-    WeeklyScheduleRequestBody:
+    WeeklyStorageScheduleRequestBodyExample:
       value:
         schedule:
           - time: 0
@@ -1185,9 +1359,10 @@ components:
           - time: 32400
             storageMode: "charge"
             days: [false, true, true, true, true, true, false]
-    RealtimeStorageScheduleResponse:
+    RealtimeStorageScheduleResponseExample:
       value:
-        href: https://api.stash.energy/utilities/12abcde3-fgh4-5ij6-k7l8-9012345mn678/units/12abcde3-fgh4-5ij6-k7l8-9012345mn678/realtime-schedule
+        href: https://api.stash.energy/utilities/12abcde3-fgh4-5ij6-k7l8-9012345mn678/units/f2cdd3f373848c071a2d38e4684e0c7cfb3b8d8bd33d46e5106332de7ea2d16fe49f82415deeee0527436e9786f83447e7dc861f5f3179bd55c4168b320913bb/realtime-schedule
+        hasBeenDelivered: true
         schedule:
           - start: 1577836800
             end: 1577851200
@@ -1198,10 +1373,11 @@ components:
           - start: 1577865600
             end: 1577880000
             storageMode: "discharge"
-    WeeklyScheduleResponse:
+    WeeklyStorageScheduleResponseExample:
       value:
-        href: https://api.stash.energy/utilities/12abcde3-fgh4-5ij6-k7l8-9012345mn678/units/12abcde3-fgh4-5ij6-k7l8-9012345mn678/weekly-schedule
+        href: https://api.stash.energy/utilities/12abcde3-fgh4-5ij6-k7l8-9012345mn678/units/f2cdd3f373848c071a2d38e4684e0c7cfb3b8d8bd33d46e5106332de7ea2d16fe49f82415deeee0527436e9786f83447e7dc861f5f3179bd55c4168b320913bb/weekly-schedule
         utcOffset: 0
+        hasBeenDelivered: true
         schedule:
           - time: 0
             days: [false, true, true, true, true, true, false]
@@ -1212,17 +1388,17 @@ components:
           - time: 32400
             storageMode: "charge"
             days: [false, true, true, true, true, true, false]
-    BadRequest:
+    BadRequestResponseExample:
       value:
         status: 400
         code: 40001
         message: "Could not parse body of request"
-    NotFound:
+    NotFoundResponseExample:
       value:
         status: 404
         code: 40401
-        message: "Utility not found: '12abcde3-fgh4-5ij6-k7l8-9012345mn678'"
-    UnprocessableEntity:
+        message: "Utility not found: '1-12abcde3-fgh4-5ij6-k7l8-9012345mn678'"
+    UnprocessableEntityResponseExample:
       value:
         status: 422
         code: 42201
@@ -1230,8 +1406,3 @@ components:
         errors:
           - property: schedule[0].storageMode
             message: Value "chrge" is not defined in enum.
-    DeviceUpdateFailed:
-      value:
-        status: 503
-        code: 50301
-        message: Could not update device
