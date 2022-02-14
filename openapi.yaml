@@ -124,7 +124,10 @@ paths:
         - Utilities
       operationId: createUnitPairingCode
       summary: Create a unit pairing code
-      description: Creates and returns a pairing code that can be entered into a Stash unit to pair that unit with the utility
+      description: |
+        Creates and returns a pairing code that can be entered into a Stash unit to pair that unit with the utility.
+
+        When creating a pairing code, the `status` will always be `"new"` and the `unitId` will always be `null`. Continue monitoring these fields by querying the code at the [Get a unit pairing code](#operation/getUnitPairingCode) endpoint
       responses:
         "200":
           description: SUCCESS
@@ -132,6 +135,9 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/PairingCode"
+              examples:
+                one:
+                  $ref: "#/components/examples/NewPairingCodeResponseExample"
         "401":
           $ref: "#/components/responses/Unauthorized"
         "404":
@@ -716,7 +722,7 @@ components:
             * `"unitAlreadyPaired"`: The unit cannot be paired because it is already paired with another utility
         unitId:
           type: string
-          description: The ID of the unit that was paired successfully to the utility. Only populated when the pairing code `status` is `"success"``.
+          description: The ID of the unit that was paired successfully to the utility. Only populated when the pairing code `status` is `"success"`.
           examples:
             - ac57ae8227db0eb6977413961b6168a02dd59b59f2d78215908a1a04adc95fde0762fe1a107a795b2842fc91e43d7b50a4827765f757eae1a9a72232368b9788
     PastStates:
@@ -1373,6 +1379,13 @@ components:
           - start: 1577865600
             end: 1577880000
             storageMode: "discharge"
+    NewPairingCodeResponseExample:
+      value:
+        href: https://api.stash.energy/utilities/12abcde3-fgh4-5ij6-k7l8-9012345mn678/pairing-codes/01234567
+        code: "01234567"
+        expiresOn: 1617836800
+        status: new
+        unitId: null
     WeeklyStorageScheduleResponseExample:
       value:
         href: https://api.stash.energy/utilities/12abcde3-fgh4-5ij6-k7l8-9012345mn678/units/f2cdd3f373848c071a2d38e4684e0c7cfb3b8d8bd33d46e5106332de7ea2d16fe49f82415deeee0527436e9786f83447e7dc861f5f3179bd55c4168b320913bb/weekly-schedule
