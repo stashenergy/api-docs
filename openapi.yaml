@@ -622,6 +622,18 @@ components:
           description: Unit's ID
           examples:
             - ac57ae8227db0eb6977413961b6168a02dd59b59f2d78215908a1a04adc95fde0762fe1a107a795b2842fc91e43d7b50a4827765f757eae1a9a72232368b9788
+        serialNumber:
+          type: string
+          readOnly: true
+          description: Unit's serial number
+          examples:
+            - ABCDEF01
+        type:
+          type: string
+          readOnly: true
+          description: The type of storage unit, e.g. M1
+          examples:
+            - M1
         tags:
           type: array
           readOnly: true
@@ -630,12 +642,6 @@ components:
           description: Array of tags assigned to this unit.
           examples:
             - ["tag1"]
-        type:
-          type: string
-          readOnly: true
-          description: The type of storage unit, e.g. M1
-          examples:
-            - M1
         connectionReliability:
           type: number
           readOnly: true
