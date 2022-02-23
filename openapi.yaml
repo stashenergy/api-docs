@@ -53,6 +53,13 @@ info:
 
     We reserve the right to revoke access to any user who abuses the API.
 
+    ## Changelog
+
+    ### 2022-02-23
+    - Added: The serial number of a unit is now included in the `serialNumber` property of Unit responses
+    - Changed: Tags can now include any character
+    - Changed: Pairing codes now expire in 24 hours
+
 servers:
   - url: https://api.stash.energy
     description: Production Server
