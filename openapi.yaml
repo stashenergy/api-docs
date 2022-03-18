@@ -65,6 +65,8 @@ servers:
     description: Production Server
 paths:
   /user:
+    parameters:
+      - $ref: "#/components/parameters/AccessToken"
     get:
       tags:
         - User
@@ -83,6 +85,8 @@ paths:
         "500":
           $ref: "#/components/responses/InternalError"
   /utilities:
+    parameters:
+      - $ref: "#/components/parameters/AccessToken"
     get:
       tags:
         - Utilities
@@ -104,6 +108,7 @@ paths:
   /utilities/{utilityId}:
     parameters:
       - $ref: "#/components/parameters/Utility"
+      - $ref: "#/components/parameters/AccessToken"
     get:
       tags:
         - Utilities
@@ -126,6 +131,7 @@ paths:
   /utilities/{utilityId}/pairing-codes:
     parameters:
       - $ref: "#/components/parameters/Utility"
+      - $ref: "#/components/parameters/AccessToken"
     post:
       tags:
         - Utilities
@@ -155,6 +161,7 @@ paths:
     parameters:
       - $ref: "#/components/parameters/Utility"
       - $ref: "#/components/parameters/PairingCode"
+      - $ref: "#/components/parameters/AccessToken"
     get:
       tags:
         - Utilities
@@ -177,6 +184,7 @@ paths:
   /utilities/{utilityId}/units:
     parameters:
       - $ref: "#/components/parameters/Utility"
+      - $ref: "#/components/parameters/AccessToken"
     get:
       tags:
         - Units
@@ -224,6 +232,7 @@ paths:
   /utilities/{utilityId}/units/update:
     parameters:
       - $ref: "#/components/parameters/Utility"
+      - $ref: "#/components/parameters/AccessToken"
     patch:
       tags:
         - Units
@@ -248,6 +257,7 @@ paths:
   /utilities/{utilityId}/units/update-by-tags:
     parameters:
       - $ref: "#/components/parameters/Utility"
+      - $ref: "#/components/parameters/AccessToken"
     patch:
       tags:
         - Units
@@ -273,6 +283,7 @@ paths:
     parameters:
       - $ref: "#/components/parameters/Utility"
       - $ref: "#/components/parameters/Unit"
+      - $ref: "#/components/parameters/AccessToken"
     get:
       parameters:
         - $ref: "#/components/parameters/Research"
@@ -310,6 +321,7 @@ paths:
       - $ref: "#/components/parameters/Utility"
       - $ref: "#/components/parameters/Unit"
       - $ref: "#/components/parameters/StartTimestamp"
+      - $ref: "#/components/parameters/AccessToken"
       - $ref: "#/components/parameters/EndTimestamp"
       - $ref: "#/components/parameters/Limit"
       - $ref: "#/components/parameters/Research"
@@ -342,6 +354,7 @@ paths:
     parameters:
       - $ref: "#/components/parameters/Utility"
       - $ref: "#/components/parameters/Unit"
+      - $ref: "#/components/parameters/AccessToken"
       - $ref: "#/components/parameters/State"
       - $ref: "#/components/parameters/Research"
     get:
@@ -369,6 +382,7 @@ paths:
     parameters:
       - $ref: "#/components/parameters/Utility"
       - $ref: "#/components/parameters/Unit"
+      - $ref: "#/components/parameters/AccessToken"
     get:
       tags:
         - Unit Storage
@@ -427,6 +441,7 @@ paths:
     parameters:
       - $ref: "#/components/parameters/Utility"
       - $ref: "#/components/parameters/Unit"
+      - $ref: "#/components/parameters/AccessToken"
     get:
       tags:
         - Unit Storage
@@ -1190,6 +1205,15 @@ components:
         realtimeSchedule:
           $ref: "#/components/schemas/RealtimeScheduleUpdate"
   parameters:
+    AccessToken:
+      name: Authorization
+      in: header
+      required: true
+      description: |
+        `Bearer `, followed by an access token. See [Authentication](#section/Introduction/Authentication) for more info.
+      schema:
+        type: string
+        pattern: "^Bearer .+$"
     Expand:
       name: expand
       in: query
