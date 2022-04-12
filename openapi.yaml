@@ -2,7 +2,7 @@ openapi: "3.1.0"
 info:
   title: Stash Energy API
   license:
-    name: ""
+    name: "BSD"
     url: "#"
   version: ""
   contact:
@@ -17,56 +17,20 @@ info:
     If you're interested in integrating your utility management software with
     Stash Energy, please contact us!
 
-    We currently provide our documentation in the form of an [OpenAPI 3.1.0](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md)
-    document.
-
-    ## Authentication
-
-    Tokens should be made using the OAuth Bearer Token specification,
-    using the Authorization header in the request.
-
-    Here is an example:
-
-    ```
-    GET /utilities HTTP/1.1
-    Host: api.stash.energy
-    Authorization: Bearer {token}
-    ```
-
-    ### Authentication flow
-
-    1. Get an `id` and `key` from your Stash Energy representative (one time only)
-    2. Send a POST command to [this URL](https://auth.api.stash.energy/60658de9-a14c-4bb9-8dc5-26d1bd003872/oauth2/v2.0/token?p=b2c_1_auth&grant_type=password&scope=openid%20032d91df-6ddf-43d3-bcc9-8015d1f5a539&client_id=032d91df-6ddf-43d3-bcc9-8015d1f5a539&response_type=token) with the following parameters in the `x-www-form-urlencoded` format:
-        * username = `<id>`
-        * password = `<key>`
-    3. Retrieve the access token from the `access_token` property of the JSON response
-    4. Use this token to authenticate your API requests. (Include it in the Authorization header)
-
-    **NOTE: The access token will be valid for 4 hours**
-
-    ## Security best practices
-
-    * ALWAYS keep your password and access tokens in a secure location.
-    * DO NOT share your password or access tokens.
-    * NEVER check your password or access tokens into version control (ex. git).
-    * It is RECOMMENDED to change your password at least every 6 months.
-
-    We reserve the right to revoke access to any user who abuses the API.
-
     ## Changelog
 
     ### 2022-02-23
     - Added: The serial number of a unit is now included in the `serialNumber` property of Unit responses
     - Changed: Tags can now include any character
     - Changed: Pairing codes now expire in 24 hours
-
+security:
+  - OAuth2:
+      - "openid 032d91df-6ddf-43d3-bcc9-8015d1f5a539"
 servers:
   - url: https://api.stash.energy
     description: Production Server
 paths:
   /user:
-    parameters:
-      - $ref: "#/components/parameters/AccessToken"
     get:
       tags:
         - User
@@ -85,8 +49,6 @@ paths:
         "500":
           $ref: "#/components/responses/InternalError"
   /utilities:
-    parameters:
-      - $ref: "#/components/parameters/AccessToken"
     get:
       tags:
         - Utilities
@@ -108,7 +70,6 @@ paths:
   /utilities/{utilityId}:
     parameters:
       - $ref: "#/components/parameters/Utility"
-      - $ref: "#/components/parameters/AccessToken"
     get:
       tags:
         - Utilities
@@ -131,7 +92,6 @@ paths:
   /utilities/{utilityId}/pairing-codes:
     parameters:
       - $ref: "#/components/parameters/Utility"
-      - $ref: "#/components/parameters/AccessToken"
     post:
       tags:
         - Utilities
@@ -161,7 +121,6 @@ paths:
     parameters:
       - $ref: "#/components/parameters/Utility"
       - $ref: "#/components/parameters/PairingCode"
-      - $ref: "#/components/parameters/AccessToken"
     get:
       tags:
         - Utilities
@@ -184,7 +143,6 @@ paths:
   /utilities/{utilityId}/units:
     parameters:
       - $ref: "#/components/parameters/Utility"
-      - $ref: "#/components/parameters/AccessToken"
     get:
       tags:
         - Units
@@ -232,7 +190,6 @@ paths:
   /utilities/{utilityId}/units/update:
     parameters:
       - $ref: "#/components/parameters/Utility"
-      - $ref: "#/components/parameters/AccessToken"
     patch:
       tags:
         - Units
@@ -257,7 +214,6 @@ paths:
   /utilities/{utilityId}/units/update-by-tags:
     parameters:
       - $ref: "#/components/parameters/Utility"
-      - $ref: "#/components/parameters/AccessToken"
     patch:
       tags:
         - Units
@@ -283,7 +239,6 @@ paths:
     parameters:
       - $ref: "#/components/parameters/Utility"
       - $ref: "#/components/parameters/Unit"
-      - $ref: "#/components/parameters/AccessToken"
     get:
       parameters:
         - $ref: "#/components/parameters/Research"
@@ -321,7 +276,6 @@ paths:
       - $ref: "#/components/parameters/Utility"
       - $ref: "#/components/parameters/Unit"
       - $ref: "#/components/parameters/StartTimestamp"
-      - $ref: "#/components/parameters/AccessToken"
       - $ref: "#/components/parameters/EndTimestamp"
       - $ref: "#/components/parameters/Limit"
       - $ref: "#/components/parameters/Research"
@@ -354,7 +308,6 @@ paths:
     parameters:
       - $ref: "#/components/parameters/Utility"
       - $ref: "#/components/parameters/Unit"
-      - $ref: "#/components/parameters/AccessToken"
       - $ref: "#/components/parameters/State"
       - $ref: "#/components/parameters/Research"
     get:
@@ -382,7 +335,6 @@ paths:
     parameters:
       - $ref: "#/components/parameters/Utility"
       - $ref: "#/components/parameters/Unit"
-      - $ref: "#/components/parameters/AccessToken"
     get:
       tags:
         - Unit Storage
@@ -441,7 +393,6 @@ paths:
     parameters:
       - $ref: "#/components/parameters/Utility"
       - $ref: "#/components/parameters/Unit"
-      - $ref: "#/components/parameters/AccessToken"
     get:
       tags:
         - Unit Storage
@@ -501,6 +452,28 @@ paths:
         "500":
           $ref: "#/components/responses/InternalError"
 components:
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      description: |
+        Get a username and password from your Stash Energy representative.
+
+        **NOTE: The access token will be valid for 4 hours**
+
+        ## Security best practices
+
+        * ALWAYS keep your password and access tokens in a secure location.
+        * DO NOT share your password or access tokens.
+        * NEVER check your password or access tokens into version control (ex. git).
+        * It is RECOMMENDED to change your password at least every 6 months.
+
+        We reserve the right to revoke access to any user who abuses the API.
+      flows:
+        password:
+          tokenUrl: https://auth.api.stash.energy/60658de9-a14c-4bb9-8dc5-26d1bd003872/oauth2/v2.0/token?p=b2c_1_auth
+          scopes:
+            "openid 032d91df-6ddf-43d3-bcc9-8015d1f5a539": "Execute all commands"
+
   responses:
     BadRequest: # 400
       description: BAD_REQUEST
@@ -1205,15 +1178,6 @@ components:
         realtimeSchedule:
           $ref: "#/components/schemas/RealtimeScheduleUpdate"
   parameters:
-    AccessToken:
-      name: Authorization
-      in: header
-      required: true
-      description: |
-        `Bearer `, followed by an access token. See [Authentication](#section/Introduction/Authentication) for more info.
-      schema:
-        type: string
-        pattern: "^Bearer .+$"
     Expand:
       name: expand
       in: query
