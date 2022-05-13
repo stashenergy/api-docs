@@ -890,6 +890,12 @@ components:
               readOnly: true
               examples:
                 - 23.5
+            heatPumpMode:
+              type: number
+              description: The user-set heat pump mode (0 - off, 1 - heat, 2 - cool)
+              readOnly: true
+              examples:
+                - 1
     StorageModeEnum:
       type: string
       description: |
