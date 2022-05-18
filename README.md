@@ -11,14 +11,9 @@ Prerequisites:
 - node
 - pnpm
 
-### To view
-
-1. `$ pnpm build`
-2. Open the generated redoc-static.html file in a web broswer
-
 ### To edit and see live changes while editing
 
 1. `$ pnpm dev`
 2. Open a web browser at the URL specified in the command output
 3. Make changes to the spec and save it
-4. Refresh the web page to see the updated docs
+4. Wait for the web page to refresh

@@ -6,10 +6,9 @@
   "license": "MIT",
   "private": false,
   "scripts": {
-    "dev": "redoc-cli serve --watch openapi.yaml",
-    "build": "redoc-cli bundle --cdn openapi.yaml"
+    "dev": "redocly preview-docs openapi.yaml"
   },
-  "devDependencies": {
-    "redoc-cli": "^0.12.2"
+  "dependencies": {
+    "@redocly/cli": "1.0.0-beta.97"
   }
 }
