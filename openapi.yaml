@@ -891,11 +891,7 @@ components:
               examples:
                 - 23.5
             heatPumpMode:
-              type: number
-              description: The user-set heat pump mode (0 - off, 1 - heat, 2 - cool)
-              readOnly: true
-              examples:
-                - 1
+              $ref: "#/components/schemas/HeatPumpModeEnum"
     StorageModeEnum:
       type: string
       description: |
@@ -909,6 +905,19 @@ components:
         - maintain
       examples:
         - charge
+    HeatPumpModeEnum:
+      type: string
+      description: |
+        The user-set heat pump mode.
+        * `"off"`: The heat pump is off
+        * `"heat"`: The heat pump is in heating mode
+        * `"cool"`: The heat pump is in cooling mode
+      enum:
+        - off
+        - heat
+        - cool
+      examples:
+        - heat
     RealtimeStorageScheduleResponse:
       type: object
       description: A unit's schedule, consisting of a list of StorageEvents. Times are Unix timestamps
