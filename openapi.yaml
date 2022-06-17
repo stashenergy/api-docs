@@ -456,7 +456,27 @@ components:
     OAuth2:
       type: oauth2
       description: |
-        Get a username and password from your Stash Energy representative.
+        ## Authentication
+
+        Tokens should be made using the OAuth Bearer Token specification,
+        using the Authorization header in the request.
+
+        Here is an example:
+
+        ```
+        GET /utilities HTTP/1.1
+        Host: api.stash.energy
+        Authorization: Bearer {token}
+        ```
+
+        ### Authentication flow
+
+        1. Get an `id` and `key` from your Stash Energy representative (one time only)
+        2. Send a POST command to [this URL](https://auth.api.stash.energy/60658de9-a14c-4bb9-8dc5-26d1bd003872/oauth2/v2.0/token?p=b2c_1_auth&grant_type=password&scope=openid%20032d91df-6ddf-43d3-bcc9-8015d1f5a539&client_id=032d91df-6ddf-43d3-bcc9-8015d1f5a539&response_type=token) with the following parameters in the `x-www-form-urlencoded` format:
+            * username = `<id>`
+            * password = `<key>`
+        3. Retrieve the access token from the `access_token` property of the JSON response
+        4. Use this token to authenticate your API requests. (Include it in the Authorization header)
 
         **NOTE: The access token will be valid for 4 hours**
 
@@ -470,9 +490,8 @@ components:
         We reserve the right to revoke access to any user who abuses the API.
       flows:
         password:
-          tokenUrl: https://auth.api.stash.energy/60658de9-a14c-4bb9-8dc5-26d1bd003872/oauth2/v2.0/token?p=b2c_1_auth
-          scopes:
-            "openid 032d91df-6ddf-43d3-bcc9-8015d1f5a539": "Execute all commands"
+          tokenUrl: https://auth.api.stash.energy/60658de9-a14c-4bb9-8dc5-26d1bd003872/oauth2/v2.0/token?p=b2c_1_auth&grant_type=password&scope=openid%20032d91df-6ddf-43d3-bcc9-8015d1f5a539&client_id=032d91df-6ddf-43d3-bcc9-8015d1f5a539&response_type=token
+          scopes: {}
 
   responses:
     BadRequest: # 400
