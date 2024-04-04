@@ -620,7 +620,6 @@ components:
         - type
         - firmwareVersion
         - connectionReliability
-        - maxCharge
         - maxDemand
       properties:
         href:
@@ -670,27 +669,6 @@ components:
           description: The unit's Stash firmware version
           examples:
             - v1.1.0 (2019102513)
-        maxCapacity:
-          type: number
-          readOnly: true
-          description: |
-            Deprecated: use `maxCharge` instead.  
-            Max charge capacity of the storage unit, in kWh.
-          deprecated: true
-        maxCharge:
-          type: number
-          readOnly: true
-          description: The maximum amount of thermal energy the system can store, converted to electrical units (kWh)
-          examples:
-            - 3.5
-        maxChargeRate:
-          type: number
-          format: double
-          readOnly: true
-          description: |
-            Deprecated: use `maxDemand` instead.  
-            Max charge rate of the storage unit, in kW
-          deprecated: true
         maxDemand:
           type: number
           readOnly: true
@@ -799,55 +777,12 @@ components:
           $ref: "#/components/schemas/ScheduleModeEnum"
         storageMode:
           $ref: "#/components/schemas/StorageModeEnum"
-        chargeLimit:
-          type: object
-          description: Based on the forecasted consumption this is the maximum and minimum amounts of energy the system will store (kWh)
-          readOnly: true
-          properties:
-            min:
-              type: number
-              description: The device will not discharge beyond this limit (kWh)
-              examples:
-                - 0.0
-            max:
-              type: number
-              description: The device will not charge past this limit (kWh)
-              examples:
-                - 2.0
-        chargeRate:
-          type: number
-          format: double
-          description: |
-            Deprecated - use `demand` instead.  
-            Current charging rate, in kW
-          readOnly: true
-          deprecated: true
         demand:
           type: number
           description: The electrical energy the heat pump is using (kW)
           readOnly: true
           examples:
             - 1.25
-        dischargeRate:
-          type: number
-          format: double
-          description: |
-            Deprecated - use `consumption` instead.  
-            Current discharge rate, in kW
-          readOnly: true
-          deprecated: true
-        consumption:
-          type: number
-          description: The thermal energy going into the home, converted to its electrical equivalent (kW)
-          readOnly: true
-          examples:
-            - 0.0
-        charge:
-          type: number
-          description: The amount of thermal energy stored in the unit, converted to its electrical equivalent (kWh)
-          readOnly: true
-          examples:
-            - 1.5
         outdoorTemp:
           type: number
           description: The outdoor ambient temperature (ºC)
