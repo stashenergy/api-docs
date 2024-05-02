@@ -19,6 +19,9 @@ info:
 
     ## Changelog
     ### 2024-05-02
+    - Added: New heat pump modes fan only and dehumidify
+    - Changed: Compressor speed from 0-100% to 0-120hz
+    - Removed: max charge, max capacity, max charge rate, charge limit, charge rate, discharge rate, and max demand
 
     ### 2022-02-23
     - Added: The serial number of a unit is now included in the `serialNumber` property of Unit responses
