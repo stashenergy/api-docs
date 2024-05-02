@@ -18,6 +18,7 @@ info:
     Stash Energy, please contact us!
 
     ## Changelog
+    ### 2024-05-02
 
     ### 2022-02-23
     - Added: The serial number of a unit is now included in the `serialNumber` property of Unit responses
@@ -620,7 +621,6 @@ components:
         - type
         - firmwareVersion
         - connectionReliability
-        - maxDemand
       properties:
         href:
           type: string
@@ -669,12 +669,6 @@ components:
           description: The unit's Stash firmware version
           examples:
             - v1.1.0 (2019102513)
-        maxDemand:
-          type: number
-          readOnly: true
-          description: The maximum electrical demand for the heat pump system (kW)
-          examples:
-            - 1.5
         state:
           description: The unit's most recent recorded state
           oneOf:
@@ -825,9 +819,9 @@ components:
                 - 0
             compressorSpeed:
               type: integer
-              description: Percentage of how fast the compressor is running (%)
+              description: How fast the compressor is running (hz)
               minimum: 0
-              maximum: 100
+              maximum: 120
               readOnly: true
               examples:
                 - 0
@@ -866,10 +860,14 @@ components:
         * `"off"`: The heat pump is off
         * `"heat"`: The heat pump is in heating mode
         * `"cool"`: The heat pump is in cooling mode
+        * `"dehumidify"`: The heat pump is in dehumidify mode
+        * `"fan"`: The heat pump is in fan only mode
       enum:
         - off
         - heat
         - cool
+        - dehumidify
+        - fan
       examples:
         - heat
     RealtimeStorageScheduleResponse:
