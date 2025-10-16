@@ -2,7 +2,7 @@
 
 The documentation for the Stash Energy API uses the [OpenAPI 3 specification format](https://github.com/OAI/OpenAPI-Specification/).
 
-Currently we use [ReDoc](https://github.com/Rebilly/ReDoc) to generate the HTML docs we host at <https://dev.stash.energy>
+Currently we use [ReDoc](https://github.com/Rebilly/ReDoc) to generate the HTML docs we host at <https://dev.stash.energy/dev>
 
 ## How to view and/or edit the documentation
 
